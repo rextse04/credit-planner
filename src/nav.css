@@ -1,0 +1,117 @@
+.nav {
+    height: 30px;
+    width: 100%;
+    display: flex;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--lightcolor);
+    justify-content: space-between;
+}
+.footer.nav {
+    border-top: 1px solid var(--lightcolor);
+    border-bottom: none;
+}
+.title {
+    --color: burlywood;
+    position: relative;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+.title > .helper {
+    position: absolute;
+    visibility: hidden;
+    white-space: nowrap;
+}
+.title > .text {
+    box-sizing: content-box;
+    font-size: inherit;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-skip: none;
+    text-decoration-skip-ink: none;
+}
+.title:hover > .text {
+    text-decoration-color: var(--lightcolor);
+}
+.title > .text:focus {
+    text-decoration-color: var(--color);
+}
+.title > .edit {
+    position: absolute;
+    right: 0;
+    transform: translateX(calc(100% + 5px));
+    font-size: smaller;
+    color: transparent
+}
+.title:hover > .edit {
+    color: var(--lightcolor);
+}
+.title > .text:focus + .edit {
+    color: var(--color);
+}
+
+.menu-group {
+    position: relative;
+}
+.menu-group > .menu {
+    visibility: hidden;
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 10px - 5px);
+    width: 300px;
+    margin: 5px;
+    background: white;
+    clip-path: margin-box inset(0 0 100% 0);
+    
+    transition-property: visibility, clip-path;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+.left {left: -5px}
+.right {right: -5px}
+.menu-group.active > .menu {
+    visibility: visible;
+    clip-path: margin-box inset(0 0 0 0);
+    overflow: hidden;
+}
+.menu-group > .menu > * {
+    width: 100%;
+}
+
+.plans-menu {
+    padding: 5px 10px;
+    gap: 5px;
+    font-size: smaller;
+}
+.plans-menu > .frame-btn {
+    justify-content: space-between;
+    gap: 5px;
+    max-width: 100%;
+}
+.plans-menu > .frame-btn > .btn-group {
+    gap: 8px;
+}
+.plans-menu > .add {
+    --color: purple;
+}
+
+.menu-menu > * {
+    display: grid;
+    height: 30px;
+    grid-template-columns: 15px 1fr;
+}
+.menu-menu > :not(:last-child) {
+    border-bottom: 1px solid var(--lightcolor);
+}
+.menu-menu .icon {
+    justify-self: center;
+}
+
+.about {
+    gap: 5px;
+}
+.about > .app-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}

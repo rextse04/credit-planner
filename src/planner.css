@@ -1,0 +1,91 @@
+.planner {
+    height: 100%;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: space-between;
+    
+    transition-property: min-width, height;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out;
+}
+@media (max-width: 512px) {
+    .req-active > .planner {
+        height: var(--planner-dim);
+    }
+}
+@media (min-width: 512px) {
+    .req-active > .planner {
+        min-width: var(--planner-dim);
+    }
+}
+.planner > .main {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 5px; /* Adjust for shadow*/
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+}
+.planner > .main [class="block"] {
+    max-width: 350px;
+}
+.planner > .main [class="block"] .add {
+    --color: brown;
+}
+
+table.cred-tb {
+    width: 100%;
+    table-layout: fixed;
+    border-spacing: 2px 0;
+}
+table.cred-tb, table.cred-tb :is(tr, th, td) {
+    border: none;
+    text-align: left;
+}
+table.cred-tb th.toggle {
+    width: 18px;
+}
+table.cred-tb th.code {
+    width: 10ch;
+}
+table.cred-tb th.cred {
+    width: 4ch;
+}
+table.cred-tb th.del {
+    width: 18px;
+}
+table.cred-tb td > input:not([type=checkbox]) {
+    width: 100%;
+    text-overflow: ellipsis;
+}
+table.cred-tb td:last-child {
+    text-align: center;
+}
+
+.planner > .aux {
+    min-height: 30px;
+    display: flex;
+    gap: 10px;
+}
+.planner > .aux > div {
+    height: 100%;
+}
+.planner > .aux > .cred {
+    flex-grow: 1;
+    justify-content: space-between;
+}
+.planner > .aux > .req-toggle {
+    justify-content: center;
+}
+
+.sem-setting > .form .sem_year {
+    width: 4ch;
+}
+.sem-setting > .form .sem_sem {
+    width: 100px;
+}
+.sem-setting > .form .sems {
+    width: 4ch;
+}

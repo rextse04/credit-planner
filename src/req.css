@@ -1,0 +1,146 @@
+.req {
+    --nav-height: 30px;
+    --gap: 5px;
+    box-sizing: border-box;
+    gap: var(--gap);
+}
+@media (max-width: 512px) {
+    .req {
+        height: calc(100% - var(--planner-dim));
+        width: 100%;
+        box-shadow: 0px -3px 5px 0px var(--lightercolor);
+    }
+}
+@media (min-width: 512px) {
+    .req {
+        height: 100%;
+        min-width: calc(100% - var(--planner-dim));
+        box-shadow: -5px 0px 5px 0px var(--lightercolor);
+    }
+}
+.req > .nav {
+    height: var(--nav-height);
+}
+.req > .main {
+    width: 100%;
+    height: calc(100% - var(--nav-height) * 2 - var(--gap) * 2);
+    overflow: auto;
+    box-sizing: border-box;
+    gap: 10px;
+}
+.vadd {
+    --color: lightgray;
+    background: var(--color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: transform 0.05s ease-in-out;
+}
+@keyframes hydrate {
+    from {
+        background-position: bottom -10% right -10%;
+    }
+    to {
+        background-position: bottom 10% right 10%;
+    }
+}
+.vadd:hover {
+    --color: radial-gradient(circle,
+        rgb(255,240,0) 0%,
+        orange 60%,
+        orangered 100%
+    );
+    background-size: 200% 200%;
+    animation: hydrate 0.1s ease-in-out forwards;
+}
+.vadd:active {
+    transform: scale(85%);
+}
+
+.req > .main > .block > .nav:not(.footer) {
+    --color: white;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    background: color-mix(in srgb, var(--color) var(--light), white);
+}
+.req > .main > .block > .main {
+    max-height: var(--main-height);
+    clip-path: inset(0 0 0 0);
+
+    transition-property: max-height, clip-path;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-in-out;
+}
+.req > .main > .block.collapsed > .main {
+    max-height: 0;
+    clip-path: inset(0 0 100% 0);
+}
+.req > .main > .block > .toggle {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid var(--lightcolor);
+}
+.req > .main > .block > .toggle > button {
+    transition: transform 0.1s linear;
+}
+.req > .main > .block.collapsed > .toggle > button {
+    transform: rotate(180deg);
+}
+
+.req > .main > .block .main .sec {
+    position: relative;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.req > .main > .block .main .sec > * {
+    --color: var(--default-color); /* blocks inheritance of --color */
+}
+.req > .main > .block > .main > * .sec::before {
+    content: attr(data-type);
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.req > .main > .block > .main > * .sec[data-type] {
+    border: 2px solid color-mix(in srgb, var(--color) var(--lighter), white);
+    border-radius: 2px;
+}
+.req > .main > .block > .main > * .sec[data-type]:focus-within {
+    border-color: var(--color);
+}
+.req > .main > .block > .main > * .sec[data-type="and"]::before {
+    color: lightcoral;
+}
+.req > .main > .block > .main > * .sec[data-type="or"]::before {
+    color: lightseagreen;
+}
+.req > .main > .block > .main > * .sec[data-type="xor"]::before {
+    color: skyblue;
+}
+.req > .main > .block > .main .btn-group {
+    gap: 8px;
+}
+.req > .main > .block > .main .btn-group > button {
+    --dim: 30px;
+    width: var(--dim);
+    height: var(--dim);
+    align-items: center;
+    justify-content: center;
+}
+.req > .main > .block > .main > * .restraint {
+    height: auto;
+    padding: 3px 0;
+    margin-top: 3px;
+}
+.req > .main > .block > .main > * .restraint > .field > input {
+    width: 4ch;
+}
+
+.actions {
+    justify-content: right;
+    gap: 10px;
+}

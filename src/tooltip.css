@@ -1,0 +1,31 @@
+.has-message {
+    --tip-height: 8px;
+    position: relative;
+}
+.has-message:hover::after {
+    content: "";
+    width: calc(var(--tip-height) * 1.5);
+    height: var(--tip-height);
+    position: absolute;
+    z-index: 100;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--color) var(--lighter), white);
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+    box-shadow: var(--shadow);
+}
+.message {
+    display: none;
+}
+.has-message:hover > .message {
+    display: flex;
+    width: 100px;
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + var(--tip-height));
+    left: 50%;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--color) var(--lighter), white);
+    font-size: smaller;
+}

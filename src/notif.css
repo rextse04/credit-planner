@@ -1,0 +1,89 @@
+.notif-manager {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+@keyframes notif-lifecycle {
+    0% {
+        --timer: 100%;
+        height: 0;
+    }
+    5%, 95% {
+        --timer: 0%;
+        height: var(--height);
+    }
+    99.99% {
+        --timer: 0%;
+        height: 0;
+    }
+    100% {
+        --timer: 0%;
+        display: none;
+    }
+}
+@keyframes notif-close {
+    0% {
+        --timer: 0%;
+        height: var(--height);
+    }
+    4.99% {
+        --timer: 0%;
+        height: 0;
+    }
+    5%, 100% {
+        --timer: 0%;
+        display: none;
+    }
+}
+
+.notif-box {
+    --timer: 100%;
+    --duration: 5s;
+    --height: 35px;
+    position: relative;
+    width: 80%;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    background: white;
+    pointer-events: auto;
+    animation: calc(var(--duration) / 0.9) ease-in-out forwards notif-lifecycle;
+}
+.notif-box.closed {
+    animation: calc(var(--duration) / 0.9) ease-in-out forwards notif-close;
+}
+.notif-box[data-type = "1"] {
+    --theme: darkblue;
+}
+.notif-box[data-type = "2"] {
+    --theme: orange;
+}
+.notif-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: color-mix(in srgb, var(--theme) 20%, transparent);
+    transform: scaleX(var(--timer));
+    transform-origin: left center;
+    transition: transform var(--duration) linear;
+}
+.notif-box > .main {
+    justify-content: left;
+    gap: 8px;
+}
+.notif-box > .main > .icon {
+    color: var(--theme);
+}
+.notif-box > .main > .close {
+    margin-left: auto;
+}

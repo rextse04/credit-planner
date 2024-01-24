@@ -1,0 +1,203 @@
+:root {
+    --default-color: gray;
+    --color: var(--default-color);
+    --lighter: 30%;
+    --lightercolor: rgb(230, 230, 230);
+    --light: 60%;
+    --lightcolor: lightgray;
+    --shadow: 0px 0px 5px 1px lightgray;
+    --mobile-width: 512px;
+}
+body {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10pt;
+    overflow: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+button, .button {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+.text-btn:hover {
+    background: color-mix(in srgb, var(--color) var(--lighter), white);
+}
+.text-btn:is(:active, .active) {
+    background: color-mix(in srgb, var(--color) var(--light), white);
+}
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12pt;
+    color: var(--lightcolor);
+}
+.icon-btn.explicit {
+    color: color-mix(in srgb, var(--color) var(--light), white);
+}
+.icon-btn:is(:hover, :active, .active) {
+    color: var(--color);
+}
+.icon-btn:disabled {
+    color: gray;
+}
+.text-icon {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 20px 1fr;
+    gap: 8px;
+}
+.text-icon > .text {
+    text-align: left;
+}
+input, select, .frame-btn {
+    border: 2px solid color-mix(in srgb, var(--color) var(--lighter), white);
+    border-radius: 2px;
+}
+input, select {
+    height: 22px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 2px;
+    outline: none;
+    background-color: transparent;
+    font-family: inherit;
+    font-size: smaller;
+}
+:is(input, select, .frame-btn):hover:not(:focus, .active) {
+    border-color: color-mix(in srgb, var(--color) var(--light), white);
+}
+:is(input, select):is(:focus, .active),
+.frame-btn:is(:active, .active) {
+    border-color: var(--color);
+}
+:is(input, select).natural {
+    border: none;
+}
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+input[type=number] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+p {
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    padding: 3px 10px 3px 10px;
+    align-items: center;
+    box-sizing: border-box;
+}
+.block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+}
+
+.hmid {
+    height: 1px;
+    width: 80%;
+}
+.vmid {
+    width: 1px;
+    height: 80%;
+}
+.hmid, .vmid {
+    background-color: lightgray;
+    margin: 2px 0;
+}
+
+.add {
+    --btn-line-color: var(--lightcolor);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(180deg,
+        transparent calc(50% - 1px),
+        var(--btn-line-color) calc(50%),
+        transparent calc(50% + 1px)
+    );
+}
+.add:hover {
+    --btn-line-color: var(--color);
+}
+.add > .main {
+    background: white;
+}
+.info {--color: cornflowerblue !important}
+.warn {--color: orange !important}
+.cancel, .error {--color: red !important}
+.success {--color: green !important}
+.nav-group, .btn-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.field {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+.form {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 5px 15px;
+    align-items: baseline;
+}
+
+.vertical {
+    flex-direction: column;
+}
+.horizontal {
+    flex-direction: row;
+}
+
+.medium {
+    font-size: 20px;
+}
+.big {
+    font-size: 30px;
+}
+.large {
+    font-size: 40px;
+}
+
+#root {
+    --nav-height: 30px;
+    height: 100vh;
+}
+#root > .nav {
+    height: var(--nav-height);
+    font-size: larger;
+}
+#root > .main {
+    --planner-dim: 60%;
+    height: calc(100% - var(--nav-height));
+    padding: 10px;
+    align-items: start;
+    gap: 10px;
+}
+@media (max-width: 512px) {
+    #root > .main {
+        --planner-dim: 50%;
+        flex-direction: column;
+    }
+}
