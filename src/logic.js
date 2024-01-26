@@ -50,7 +50,7 @@ export function cred(req, counter = {}) {
             for(let member of req.members) if(member.error === false) return cred(member, counter);
     }
 }
-export function test(req, courses) {
+export function test(req, courses, past = new Set()) {
     if(req.type === "empty") return {...req, error: false};
     else if(req.type === "course") {
         if(req.disabled) return {...req, error: undefined};
@@ -65,9 +65,13 @@ export function test(req, courses) {
             };
             else throw e;
         }
-        for(let course of courses) if(regex.test(course.code)) {
-            pass = true;
-            break;
+        for(let course of courses) {
+            let code = course.code;
+            if(!past.has(code) && regex.test(code)) {
+                pass = true;
+                past.add(code);
+                break;
+            }
         }
         return {...req, error: !pass};
     } else {
@@ -77,7 +81,7 @@ export function test(req, courses) {
         let process = (default_pass, subprocess) => {
             pass = default_pass || len === 0;
             for(let member of req.members) {
-                let i = members.push(test(member, courses));
+                let i = members.push(test(member, courses, past));
                 let error = members[i-1].error;
                 if(error === undefined) continue;
                 else pass = subprocess(!error);
