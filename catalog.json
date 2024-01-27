@@ -2,6 +2,6 @@
     "courses": {
         "fullname": "course listings",
         "version": 4,
-        "target": "courses.json"
+        "target": "./courses.json"
     }
 }
