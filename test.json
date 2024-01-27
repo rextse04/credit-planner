@@ -1,0 +1,33 @@
+{
+    "COMP2012H": {
+        "name": "Honors Object-Oriented Programming in C++ and Data Structures",
+        "prereq": {
+            "type": "or",
+            "members": [
+                {
+                    "type": "course",
+                    "code": "COMP1021"
+                }, {
+                    "type": "course",
+                    "code": "COMP1022P"
+                }, {
+                    "type": "course",
+                    "code": "ISOM3230"
+                }]
+        },
+        "coreq": {
+            "type": "empty"
+        },
+        "exclusion": {
+            "type": "or",
+            "members": [{
+                "type": "course",
+                "code": "COMP2011"
+            }, {
+                "type": "course",
+                "code": "COMP2012"
+            }]
+        },
+        "cred": 5
+    }
+}
