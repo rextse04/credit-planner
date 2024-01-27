@@ -202,7 +202,6 @@ export function Req({setReqToggle}) {
                     req.s_cred = logic.cred(req.content, counter);
                 }
                 setReqs(new_reqs);
-                console.log(new_reqs);
             }}>Check</button>
         </div>
     </div>;
