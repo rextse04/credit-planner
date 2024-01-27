@@ -6,7 +6,7 @@ import { check_plan } from "./planner_util";
 export function MenuButton({children}) {
     const [active, setActive] = useState(false);
     const main = useRef();
-    return <div ref={main} className={"menu-group " + (active ? "active" : "")}
+    return <div ref={main} className={"menu-group " + (active ? "active" : "")} tabIndex="0"
         onBlur={event => main.current.contains(event.relatedTarget) ? undefined : setActive(false)}>
         {Children.map(children, child => cloneElement(child, {
             active: active,
