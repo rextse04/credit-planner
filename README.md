@@ -1,6 +1,6 @@
 # HKUST Credit Planner 📝
 
-A simple static web app to help HKUST students draft a credit plan.
+A [simple static web app](https://rextse04.github.io/credit-planner/) to help HKUST students draft a credit plan.
 
 ## Features
 
