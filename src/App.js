@@ -16,7 +16,7 @@ import "./window.css";
 import "./loading.css";
 
 // Default settings
-export const catalog_url = "/catalog.json";
+export const catalog_url = "catalog.json";
 export const default_info = {
     last_opened: 0
 };
