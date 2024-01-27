@@ -91,7 +91,7 @@ export function parseSeason(season) {
 }
 export function parseSem(sem) {
     var year = +sem.slice(0, 2);
-    return `20${year}-${year - 1} ${parseSeason(+sem.slice(2, 4))}`;
+    return `20${year}-${year - (-1)} ${parseSeason(+sem.slice(2, 4))}`;
 }
 export function condense(str) {
     return str.replace(/\s/g, "");
