@@ -63,13 +63,18 @@ self.onmessage = async event => {
             case "import":
                 const reader = new FileReader();
                 reader.onload = async () => {
-                    try {response.plan = await db.plans.add(JSON.parse(reader.result));}
-                    catch(e) {
+                    try {
+                        response.content = JSON.parse(reader.result);
+                        response.plan = await db.plans.add(response.content);
+                    } catch(e) {
                         if(e instanceof SyntaxError) {
                             response.status = false;
                             response.fail_message = "The provided file failed to be parsed. Please check if it is corrupted.";
                         }
                         else throw e;
+                    } finally {
+                        // eslint-disable-next-line no-restricted-globals
+                        self.postMessage(response);
                     }
                 };
                 reader.onerror = () => {
@@ -77,7 +82,7 @@ self.onmessage = async event => {
                     response.error = "File read failed.";
                 }
                 reader.readAsText(message.content);
-                break;
+                return;
             case "delete":
                 await db.transaction("rw", db.plans, async () => {
                     if(await db.plans.count() === 1) {

@@ -28,7 +28,13 @@ export const default_plan = {
     reqs: []
 };
 for(let key in default_info) {
-    if(localStorage.getItem(key) === null) setStorage(key, default_info[key]);
+    try {
+        let saved = localStorage.getItem(key);
+        if(saved === null) throw false;
+        JSON.parse(saved);
+    } catch(e) {
+        setStorage(key, default_info[key]);
+    }
 }
 
 // Create contexts
@@ -113,6 +119,7 @@ export default function App() {
                     break;
                 case "import":
                     switchPlan(message.plan);
+                    setPlanData(message.content);
                 case "copy":
                 case "add":
                     setTitles({...titles, [message.plan]: message.content.title});
