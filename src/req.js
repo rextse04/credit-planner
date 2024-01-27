@@ -147,9 +147,10 @@ export function Req({setReqToggle}) {
         <div className="container nav">
             <b>Requirements</b>
             <div className="btn-group">
-                <button className="icon-btn info" title="Guide">
+                <a className="button icon-btn info" title="Guide" target="_blank"
+                    href="https://github.com/rextse04/credit-planner/blob/main/GUIDE.md">
                     <i className="fa-solid fa-circle-question"></i>
-                </button>
+                </a>
                 <button className="icon-btn cancel" title="Close tab" onClick={() => setReqToggle(false)}>
                     <i className="fa-solid fa-circle-xmark"></i>
                 </button>

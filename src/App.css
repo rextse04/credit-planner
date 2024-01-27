@@ -24,6 +24,9 @@ button, .button {
     background-color: transparent;
     cursor: pointer;
 }
+a.button {
+    text-decoration: none;
+}
 .text-btn:hover {
     background: color-mix(in srgb, var(--color) var(--lighter), white);
 }

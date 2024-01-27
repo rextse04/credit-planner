@@ -1,70 +1,37 @@
-# Getting Started with Create React App
+# HKUST Credit Planner 📝
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple static web app to help HKUST students draft a credit plan.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+1. A course planner organised by semester.
+1. Requisites and exclusions auto-checking.
+1. A major requirements checker
+1. Ability to save multiple plans locally
+1. Export the plan to an Excel file (Coming soon)
 
-### `npm start`
+## FAQs
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Q**: How to change the starting semester/ total number of semesters?
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+A: In the course planner, click the cog button ⚙️ on the block for the first semester.
 
-### `npm test`
+**Q:** Why is the course planner warning me when my plan is valid?
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+A: The course database is fetched from [HKUST Class Schedule and Quota](https://w5.ab.ust.hk/wcq/cgi-bin/) using the script in `data/courses.js`. It is far from perfect, so do expect inaccuries. If you encounter them, please report them to me.
 
-### `npm run build`
+**Q:** Why does the app tell me to manually re-check my plan when the database is updated. Isn't this done automatically by the app?
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+A: To improve speed, the planner uses lazy checking, i.e. it only checks the courses affected by your edits to the plan every time you modify it. If you want to manually re-check a specific course, you can click on the input box for its code and click away. When there is a big update to the database, it is recommended you do a manual re-checking of the entire plan by opening the hamburger menu at the top left corner of the app and clicking "Recheck plan".
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**Q**: How does the requirements checker work? Can I match multiple courses with one course code? Can I add more complicated logic into my requirements?
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+A: Check out [this page](/GUIDE.md).
 
-### `npm run eject`
+## Bug reports
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+To report a bug/ suggest a feature, you may submit an issue in this github project, or you may use this form.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## License
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+MIT License. In short, you may reuse the source code however you want, you just have to include the license in your copy. Attribution would be greatly appreciated though 🥰.

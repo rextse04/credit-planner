@@ -57,7 +57,7 @@ function Menus({active, setActive}) {
                             <h1>Credit planner</h1>
                             <i>by Rex Tse</i>
                         </div>
-                        <p>Source code</p>
+                        <p><a href="https://github.com/rextse04/credit-planner">Source code</a></p>
                         <p>To report a bug or make a suggestion, you can submit an issue to the Github project linked above
                             or use this form.</p>
                         <div className="hmid"></div>
