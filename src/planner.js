@@ -77,7 +77,7 @@ export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle
                     var code = condense(event.target.value).toUpperCase();
                     const ref = window.courses[code];
                     if(setCode === undefined) {
-                        let update = {...course};
+                        let update = {...course, code: code};
                         if(code === "" || ref !== undefined) {
                             update.warn_code = false;
                             update.message_code = "";
