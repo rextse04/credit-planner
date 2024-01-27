@@ -76,32 +76,44 @@ export function test(req, courses, past = new Set()) {
         return {...req, error: !pass};
     } else {
         const len = length(req);
-        let pass;
-        let members = [];
-        let process = (default_pass, subprocess) => {
-            pass = default_pass || len === 0;
+        const new_req = {...req,
+            error: true,
+            members: []
+        };
+        const members = new_req.members;
+        let process = (default_error, subprocess) => {
+            new_req.error = default_error && len !== 0;
             for(let member of req.members) {
                 let i = members.push(test(member, courses, past));
                 let error = members[i-1].error;
-                if(error === undefined) continue;
-                else pass = subprocess(!error);
+                if(error !== undefined) new_req.error = subprocess(error);
             }
         }
         switch(req.type) {
             case "and":
-                process(true, subcase => subcase ? pass : false);
+                process(false, subcase => subcase ? true : new_req.error);
                 break;
             case "or":
-                process(false, subcase => subcase ? true : pass);
-                let error_cred = req.error_cred = req.cred && cred(req) < req.cred;
-                let error_n = req.error_n = req.n && n(req) < req.n;
-                pass = pass && !error_cred && !error_n;
+                process(true, subcase => subcase ? new_req.error : false);
+                let error_cred = new_req.error_cred = req.cred && cred(new_req) < req.cred;
+                let error_n = new_req.error_n = req.n && n(new_req) < req.n;
+                new_req.error ||= error_cred || error_n;
                 break;
             case "xor":
-                process(false, subcase => subcase ? !pass : false);
+                let matched = false;
+                process(true, subcase => {
+                    if(subcase) return new_req.error;
+                    else {
+                        if(matched) {
+                            matched = true;
+                            return false;
+                        }
+                        else return true;
+                    }
+                });
                 break;
         }
-        return {...req, error: !pass, members: members};
+        return new_req;
     }
 }
 export function reset(req) {

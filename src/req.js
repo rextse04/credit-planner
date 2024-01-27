@@ -182,7 +182,7 @@ export function Req({setReqToggle}) {
                 for(let req of reqs) new_reqs.push({
                     ...req,
                     content: logic.reset(req.content)
-                })
+                });
                 setReqs(new_reqs);
             }}>Reset</button>
             <button className="container block text-btn" onClick={() => {
@@ -193,7 +193,7 @@ export function Req({setReqToggle}) {
                     let new_req = {
                         ...req,
                         content: logic.test(req.content, courses_flat)
-                    }
+                    };
                     new_reqs.push(new_req);
                     logic.count(new_req.content, counter);
                 }
@@ -202,6 +202,7 @@ export function Req({setReqToggle}) {
                     req.s_cred = logic.cred(req.content, counter);
                 }
                 setReqs(new_reqs);
+                console.log(new_reqs);
             }}>Check</button>
         </div>
     </div>;
