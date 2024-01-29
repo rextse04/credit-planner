@@ -100,18 +100,18 @@ function ThemeButton() {
         setTheme(theme);
         setJust(true);
     };
-    const onMouseOut = () => setJust(false);
+    const onMouseLeave = () => setJust(false);
     let className = "icon-btn theme-btn " + (just ? "off " : "");
     switch(theme) {
         case 1:
             return <button className={className + "dark"} title="Switch to light mode"
-                onClick={gen_onClick(0)} onMouseOut={onMouseOut}>
+                onClick={gen_onClick(0)} onMouseLeave={onMouseLeave}>
                 <i className="fa-regular fa-lightbulb"></i>
             </button>;
         case 0:
         default:
             return <button className={className + "light"} title="Switch to dark mode"
-                onClick={gen_onClick(1)} onMouseOut={onMouseOut}>
+                onClick={gen_onClick(1)} onMouseLeave={onMouseLeave}>
                 <i className="fa-solid fa-lightbulb"></i>
             </button>;
     }
