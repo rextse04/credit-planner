@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import Nav from "./nav";
 import Planner from "./planner";
 import NotifManager from "./notif";
-import { getStorage, setStorage, useDB } from "./util";
+import { getStorage, setStorage, useDB, useLS } from "./util";
 import { Req } from "./req";
 import Window from "./window";
 import LoadingScreen from "./loading";
@@ -60,7 +60,7 @@ export default function App() {
     const [plan, setPlan] = useState(getStorage("last_opened"));
     const [planData, setPlanData] = useState(default_plan);
     const [titles, setTitles] = useState({[plan]: planData.title});
-    const [theme, setTheme] = useState(getStorage("theme"));
+    const [theme, setTheme] = useLS("theme");
     const [ready, setReady] = useState(false);
     const addNotif = notif => setNotifs(notifs => [...notifs, notif]);
     const switchPlan = index => {
