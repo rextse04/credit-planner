@@ -20,7 +20,7 @@
 .theme-btn.light {
     color: orange;
 }
-.theme-btn.light:is(:hover, :active) {
+.theme-btn.light:is(:hover, :active):not(.off) {
     color: gray;
 }
 

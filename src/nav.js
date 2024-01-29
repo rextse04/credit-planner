@@ -95,16 +95,23 @@ function Menus({active, setActive}) {
 
 function ThemeButton() {
     const [theme, setTheme] = useContext(Theme);
+    const [just, setJust] = useState(false);
+    const gen_onClick = theme => () => {
+        setTheme(theme);
+        setJust(true);
+    };
+    const onMouseOut = () => setJust(false);
+    let className = "icon-btn theme-btn " + (just ? "off " : "");
     switch(theme) {
         case 1:
-            return <button className="icon-btn theme-btn dark" title="Switch to light mode"
-                onClick={() => setTheme(0)}>
+            return <button className={className + "dark"} title="Switch to light mode"
+                onClick={gen_onClick(0)} onMouseOut={onMouseOut}>
                 <i className="fa-regular fa-lightbulb"></i>
             </button>;
         case 0:
         default:
-            return <button className="icon-btn theme-btn light" title="Switch to dark mode"
-                onClick={() => setTheme(1)}>
+            return <button className={className + "light"} title="Switch to dark mode"
+                onClick={gen_onClick(1)} onMouseOut={onMouseOut}>
                 <i className="fa-solid fa-lightbulb"></i>
             </button>;
     }

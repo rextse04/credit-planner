@@ -24,16 +24,16 @@ input, button, select {
 button, .button {
     padding: 0;
     border: none;
-    background-color: transparent;
+    background: transparent;
     cursor: pointer;
 }
 a.button {
     text-decoration: none;
 }
-.text-btn:hover {
+.text-btn:hover:not(.off) {
     background: color-mix(in srgb, var(--color) var(--lighter), var(--theme));
 }
-.text-btn:is(:active, .active) {
+.text-btn:is(:active, .active):not(.off) {
     background: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
 .icon-btn {
@@ -46,7 +46,7 @@ a.button {
 .icon-btn.explicit {
     color: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
-.icon-btn:is(:hover, :active, .active) {
+.icon-btn:is(:hover, :active, .active):not(.off) {
     color: var(--color);
 }
 .icon-btn:disabled {
@@ -72,15 +72,15 @@ input, select {
     margin: 0;
     padding: 2px;
     outline: none;
-    background-color: transparent;
+    background: transparent;
     font-family: inherit;
     font-size: smaller;
 }
 :is(input, select, .frame-btn):hover:not(:focus, .active) {
     border-color: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
-:is(input, select):is(:focus, .active),
-.frame-btn:is(:active, .active) {
+:is(input, select):is(:focus, .active):not(.off),
+.frame-btn:is(:active, .active):not(.off) {
     border-color: var(--color);
 }
 :is(input, select).natural {
@@ -127,7 +127,7 @@ p {
     height: 80%;
 }
 .hmid, .vmid {
-    background-color: var(--lightcolor);
+    background: var(--lightcolor);
     margin: 2px 0;
 }
 
@@ -187,15 +187,13 @@ p {
     font-size: 40px;
 }
 
-#root {
-    --nav-height: 30px;
+#root, #root > .wrapper {
     width: 100dvw;
     height: 100dvh;
-    overflow: clip;
 }
 #root > .wrapper {
-    width: 100%;
-    height: 100%;
+    --nav-height: 30px;
+    overflow: hidden;
     background: var(--theme);
 }
 #root > .wrapper[data-theme="1"] {
