@@ -12,7 +12,6 @@
 body {
     font-family: "Segoe UI", sans-serif;
     font-size: 10pt;
-    overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -192,6 +191,7 @@ p {
     --nav-height: 30px;
     width: 100dvw;
     height: 100dvh;
+    overflow: clip;
 }
 #root > .wrapper {
     width: 100%;
