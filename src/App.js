@@ -57,9 +57,9 @@ function Main() {
 export default function App() {
     const [notifs, setNotifs] = useState([]);
     const [_window, setWindow] = useState(null);
-    const [plan, setPlan] = useState(getStorage("last_opened"));
+    const [plan, setPlan] = useState(() => getStorage("last_opened"));
     const [planData, setPlanData] = useState(default_plan);
-    const [titles, setTitles] = useState({[plan]: planData.title});
+    const [titles, setTitles] = useState(() => ({[plan]: planData.title}));
     const [theme, setTheme] = useLS("theme");
     const [ready, setReady] = useState(false);
     const addNotif = notif => setNotifs(notifs => [...notifs, notif]);

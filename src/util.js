@@ -1,5 +1,5 @@
 import { useContext, useEffect, useReducer, useState } from "react";
-import { Plan, default_info, syncer, update_bc } from "./App";
+import { Plan, default_info, default_plan, syncer, update_bc } from "./App";
 
 // Custom Hooks
 export function getStorage(key) {
@@ -18,7 +18,7 @@ export function setStorage(key, value) {
 // Note: These two hooks gives the caller the ownership of the localStorage prop.
 // Calling them more than once for the same prop in different components can lead to bugs.
 export function useLS(key) {
-    const [value, setValue] = useState(getStorage(key));
+    const [value, setValue] = useState(() => getStorage(key));
     useEffect(() => update_bc.addEventListener("message", event => {
         const message = event.data;
         if(message.plan === null && key in message.props) setValue(message.content[key]);
@@ -35,7 +35,10 @@ export function useLS(key) {
 }
 export function useDB(key) {
     const [plan, planData] = useContext(Plan);
-    const [value, setValue] = useState(planData[key]);
+    const [value, setValue] = useState(() => {
+        const saved = planData[key];
+        return saved === undefined ? default_plan[key] : saved;
+    });
     useEffect(() => setValue(planData[key]), [plan, planData]);
     useEffect(() => update_bc.addEventListener("message", event => {
         const message = event.data;
