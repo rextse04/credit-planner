@@ -10,6 +10,10 @@
     border-top: 1px solid var(--lightcolor);
     border-bottom: none;
 }
+#root > .wrapper > .nav .btn-group {
+    gap: 8px;
+}
+
 .title {
     --color: burlywood;
     position: relative;
@@ -60,7 +64,7 @@
     top: calc(100% + 10px - 5px);
     width: 300px;
     margin: 5px;
-    background: white;
+    background: var(--theme);
     clip-path: margin-box inset(0 0 100% 0);
     
     transition-property: visibility, clip-path;
@@ -87,9 +91,6 @@
     justify-content: space-between;
     gap: 5px;
     max-width: 100%;
-}
-.plans-menu > .frame-btn > .btn-group {
-    gap: 8px;
 }
 .plans-menu > .add {
     --color: purple;

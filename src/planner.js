@@ -163,7 +163,7 @@ function Setting({startSem, setStartSem, sems, setSems}) {
     const [local_startSem, local_setStartSem] = useSync(startSem);
     const [local_sems, local_setSems] = useSync(sems);
     return <div className="setting sem-setting">
-        <div className="vertical container form">
+        <div className="container form">
             <span>First semester</span>
             <div className="field">
                 <input className="sem_year" value={local_startSem.slice(0, -2)}

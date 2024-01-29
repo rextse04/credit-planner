@@ -18,7 +18,8 @@ import "./loading.css";
 // Default settings
 export const catalog_url = "https://rextse04.github.io/credit-planner/catalog.json";
 export const default_info = {
-    last_opened: 0
+    last_opened: 0,
+    theme: 0
 };
 export const default_plan = {
     title: "New Plan",
@@ -27,19 +28,11 @@ export const default_plan = {
     courses: {},
     reqs: []
 };
-for(let key in default_info) {
-    try {
-        let saved = localStorage.getItem(key);
-        if(saved === null) throw false;
-        JSON.parse(saved);
-    } catch(e) {
-        setStorage(key, default_info[key]);
-    }
-}
 
 // Create contexts
 export const Notifs = createContext();
 export const Plan = createContext();
+export const Theme = createContext();
 export const Courses = createContext();
 
 export const loader = new Worker(new URL("./load.js", import.meta.url));
@@ -67,6 +60,7 @@ export default function App() {
     const [plan, setPlan] = useState(getStorage("last_opened"));
     const [planData, setPlanData] = useState(default_plan);
     const [titles, setTitles] = useState({[plan]: planData.title});
+    const [theme, setTheme] = useState(getStorage("theme"));
     const [ready, setReady] = useState(false);
     const addNotif = notif => setNotifs(notifs => [...notifs, notif]);
     const switchPlan = index => {
@@ -177,12 +171,16 @@ export default function App() {
         });
     }, []);
 
-    return <Notifs.Provider value={[notifs, addNotif, _window, setWindow]}>
+    return <div className="wrapper" data-theme={theme}>
+    <Notifs.Provider value={[notifs, addNotif, _window, setWindow]}>
     <Plan.Provider value={[plan, planData, titles]}>
+    <Theme.Provider value={[theme, setTheme]}>
         <Main></Main>
         <NotifManager notifs={notifs}></NotifManager>
         <Window></Window>
         {ready ? undefined : <LoadingScreen></LoadingScreen>}
+    </Theme.Provider>
     </Plan.Provider>
-    </Notifs.Provider>;
+    </Notifs.Provider>
+    </div>;
 }

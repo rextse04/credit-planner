@@ -1,11 +1,12 @@
 :root {
+    --theme: white;
     --default-color: gray;
     --color: var(--default-color);
     --lighter: 30%;
     --lightercolor: rgb(230, 230, 230);
     --light: 60%;
     --lightcolor: lightgray;
-    --shadow: 0px 0px 5px 1px lightgray;
+    --shadow: 0px 0px 5px 1px var(--lightcolor);
     --mobile-width: 512px;
 }
 body {
@@ -18,6 +19,9 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
 }
 
+input, button, select {
+    color: inherit;
+}
 button, .button {
     padding: 0;
     border: none;
@@ -28,10 +32,10 @@ a.button {
     text-decoration: none;
 }
 .text-btn:hover {
-    background: color-mix(in srgb, var(--color) var(--lighter), white);
+    background: color-mix(in srgb, var(--color) var(--lighter), var(--theme));
 }
 .text-btn:is(:active, .active) {
-    background: color-mix(in srgb, var(--color) var(--light), white);
+    background: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
 .icon-btn {
     display: flex;
@@ -41,13 +45,14 @@ a.button {
     color: var(--lightcolor);
 }
 .icon-btn.explicit {
-    color: color-mix(in srgb, var(--color) var(--light), white);
+    color: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
 .icon-btn:is(:hover, :active, .active) {
     color: var(--color);
 }
 .icon-btn:disabled {
     color: gray;
+    cursor: default;
 }
 .text-icon {
     display: grid;
@@ -59,7 +64,7 @@ a.button {
     text-align: left;
 }
 input, select, .frame-btn {
-    border: 2px solid color-mix(in srgb, var(--color) var(--lighter), white);
+    border: 2px solid color-mix(in srgb, var(--color) var(--lighter), var(--theme));
     border-radius: 2px;
 }
 input, select {
@@ -73,7 +78,7 @@ input, select {
     font-size: smaller;
 }
 :is(input, select, .frame-btn):hover:not(:focus, .active) {
-    border-color: color-mix(in srgb, var(--color) var(--light), white);
+    border-color: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
 :is(input, select):is(:focus, .active),
 .frame-btn:is(:active, .active) {
@@ -123,7 +128,7 @@ p {
     height: 80%;
 }
 .hmid, .vmid {
-    background-color: lightgray;
+    background-color: var(--lightcolor);
     margin: 2px 0;
 }
 
@@ -142,7 +147,7 @@ p {
     --btn-line-color: var(--color);
 }
 .add > .main {
-    background: white;
+    background: var(--theme);
 }
 .info {--color: cornflowerblue !important}
 .warn {--color: orange !important}
@@ -185,13 +190,28 @@ p {
 
 #root {
     --nav-height: 30px;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
 }
-#root > .nav {
+#root > .wrapper {
+    width: 100%;
+    height: 100%;
+    background: var(--theme);
+}
+#root > .wrapper[data-theme="1"] {
+    --theme: rgb(25,25,25);
+    --lightercolor: rgb(50,50,50);
+    --lightcolor: rgb(100,100,100);
+    --lighter: 60%;
+    --light: 80%;
+    --shadow: 0px 0px 5px 1px var(--lightcolor);
+    color: white;
+}
+#root > .wrapper > .nav {
     height: var(--nav-height);
     font-size: larger;
 }
-#root > .main {
+#root > .wrapper > .main {
     --planner-dim: 60%;
     height: calc(100% - var(--nav-height));
     padding: 10px;
@@ -199,7 +219,7 @@ p {
     gap: 10px;
 }
 @media (max-width: 512px) {
-    #root > .main {
+    #root > .wrapper > .main {
         --planner-dim: 50%;
         flex-direction: column;
     }

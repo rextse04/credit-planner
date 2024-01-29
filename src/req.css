@@ -58,10 +58,10 @@
 }
 
 .req > .main > .block > .nav:not(.footer) {
-    --color: white;
+    --color: var(--theme);
     border-top-left-radius: inherit;
     border-top-right-radius: inherit;
-    background: color-mix(in srgb, var(--color) var(--light), white);
+    background: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
 .req > .main > .block > .main {
     max-height: var(--main-height);
@@ -106,7 +106,7 @@
     text-transform: uppercase;
 }
 .req > .main > .block > .main > * .sec[data-type] {
-    border: 2px solid color-mix(in srgb, var(--color) var(--lighter), white);
+    border: 2px solid color-mix(in srgb, var(--color) var(--lighter), var(--theme));
     border-radius: 2px;
 }
 .req > .main > .block > .main > * .sec[data-type]:focus-within {

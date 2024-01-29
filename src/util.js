@@ -1,9 +1,15 @@
-import { useContext, useEffect, useMemo, useReducer, useState } from "react";
-import { Plan, default_plan, syncer, update_bc } from "./App";
+import { useContext, useEffect, useReducer, useState } from "react";
+import { Plan, default_info, syncer, update_bc } from "./App";
 
 // Custom Hooks
 export function getStorage(key) {
-    return JSON.parse(localStorage.getItem(key));
+    try {
+        const saved = localStorage.getItem(key);
+        if(saved === null) throw false;
+        else return JSON.parse(saved);
+    } catch {
+        return default_info[key];
+    }
 }
 export function setStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
@@ -26,12 +32,6 @@ export function useLS(key) {
             content: {[key]: value}
         });
     }];
-}
-export function get_default(plan, key) {
-    var raw_key = `${plan}_${key}`;
-    var saved = getStorage(raw_key);
-    if(saved === null) return default_plan[key];
-    else return saved;
 }
 export function useDB(key) {
     const [plan, planData] = useContext(Plan);

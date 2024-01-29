@@ -1,6 +1,6 @@
 import { Children, cloneElement, useContext, useEffect, useRef, useState } from "react";
 import { useForceUpdate, useDB, useSync } from "./util";
-import { Courses, Notifs, Plan, default_plan, syncer } from "./App";
+import { Courses, Notifs, Plan, Theme, default_plan, syncer } from "./App";
 import { check_plan } from "./planner_util";
 
 export function MenuButton({children}) {
@@ -93,6 +93,23 @@ function Menus({active, setActive}) {
     </>;
 }
 
+function ThemeButton() {
+    const [theme, setTheme] = useContext(Theme);
+    switch(theme) {
+        case 1:
+            return <button className="icon-btn theme-btn dark" title="Switch to light mode"
+                onClick={() => setTheme(0)}>
+                <i className="fa-regular fa-lightbulb"></i>
+            </button>;
+        case 0:
+        default:
+            return <button className="icon-btn theme-btn light" title="Switch to dark mode"
+                onClick={() => setTheme(1)}>
+                <i className="fa-solid fa-lightbulb"></i>
+            </button>;
+    }
+}
+
 export function TitleInput({value, setValue}) {
     const [local, setLocal] = useSync(value);
     const helper = useRef();
@@ -181,7 +198,10 @@ function Plans({current, active, setActive, main}) {
 export default function Nav() {
     const [title, setTitle] = useDB("title");
     return <div className="container nav">
-        <MenuButton><Menus></Menus></MenuButton>
+        <div className="btn-group">
+            <MenuButton><Menus></Menus></MenuButton>
+            <ThemeButton></ThemeButton>
+        </div>
         <TitleInput value={title} setValue={setTitle}></TitleInput>
         <MenuButton><Plans current={title}></Plans></MenuButton>
     </div>;
