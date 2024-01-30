@@ -2,7 +2,7 @@
 
 To launch the requirements checker, click the "Requirements" button on the bottom right corner.
 
-Click the big plus button ➕ to add a set of requirements. It usually represents a major or a minor you plan to declare.
+Click the big plus button ➕ to add a block of requirements. It usually represents a major or a minor you plan to declare.
 
 You will then see four buttons below the title of the set:
 

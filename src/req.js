@@ -46,7 +46,7 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             ...group,
             members: new_members
         });
-    }
+    };
     return <div className={"vertical sec container " + logic.get_class(group.error)} data-type={group.type}>
         <div className="btn-group">
             <button className="block text-btn" title="Add course"
@@ -106,7 +106,7 @@ function ReqBlock(props) {
     }, [maxHeight]);
     useEffect(() => {
         if(!collapsed && maxHeight !== "auto") toggleTransition();
-    }, Object.values(props))
+    }, Object.values(props));
     
     return <div className={"block " + (collapsed ? "collapsed" : "")}
         style={{"--main-height": maxHeight}}>
@@ -146,7 +146,7 @@ export function Req({setReqToggle}) {
     return <div className="block req">
         <div className="container nav">
             <b>Requirements</b>
-            <div className="btn-group">
+            <div className="small btn-group">
                 <a className="button icon-btn info" title="Guide" target="_blank"
                     href="https://github.com/rextse04/credit-planner/blob/main/GUIDE.md">
                     <i className="fa-solid fa-circle-question"></i>
@@ -159,22 +159,27 @@ export function Req({setReqToggle}) {
         <div className="vertical container main">
             {reqs.map((req, i) => <ReqBlock key={i} req={req} setReq={req => {
                 if(req === null) {
-                    setReqs(reqs.toSpliced(i, 1))
+                    setReqs(reqs.toSpliced(i, 1));
                 } else {
                     var new_reqs = [...reqs];
                     new_reqs[i] = req;
                     setReqs(new_reqs);
                 }
             }}></ReqBlock>)}
-            <button className="large vadd" title="Add requirements block"
-                onClick={() => setReqs([...reqs, {
-                name: "New Requirements",
-                content: new logic.andGroup(),
-                cred: 0,
-                s_cred: 0
-            }])}>
-                <i className="fa-solid fa-square-plus"></i>
-            </button>
+            <div className="large btn-group">
+                <button className="large vadd" title="Add requirements block"
+                    onClick={() => setReqs([...reqs, {
+                        name: "New Requirements",
+                        content: new logic.andGroup(),
+                        cred: 0,
+                        s_cred: 0
+                    }])}>
+                    <i className="fa-solid fa-square-plus"></i>
+                </button>
+                <button className="large vadd" title="Use saved requirements block">
+                    <i className="fa-solid fa-folder-open"></i>
+                </button>
+            </div>
         </div>
         <div className="container actions footer nav">
             <button className="container block text-btn" onClick={() => {

@@ -121,9 +121,6 @@
 .req > .main > .block > .main > * .sec[data-type="xor"]::before {
     color: skyblue;
 }
-.req > .main > .block > .main .btn-group {
-    gap: 8px;
-}
 .req > .main > .block > .main .btn-group > button {
     --dim: 30px;
     width: var(--dim);

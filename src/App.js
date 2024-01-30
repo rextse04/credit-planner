@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import Nav from "./nav";
 import Planner from "./planner";
 import NotifManager from "./notif";
-import { getStorage, setStorage, useDB, useLS } from "./util";
+import { useBC, useDB, useLS, usePlan } from "./util";
 import { Req } from "./req";
 import Window from "./window";
 import LoadingScreen from "./loading";
@@ -39,9 +39,7 @@ export const loader = new Worker(new URL("./load.js", import.meta.url));
 export const syncer = new Worker(new URL("./sync.js", import.meta.url));
 
 export const update_bc = new BroadcastChannel("update");
-update_bc.addEventListener("message", event => {
-    console.log("Broadcast", event.data);
-});
+update_bc.addEventListener("message", event => console.log("Broadcast", event.data));
 
 function Main() {
     const [courses, setCourses] = useDB("courses");
@@ -57,16 +55,12 @@ function Main() {
 export default function App() {
     const [notifs, setNotifs] = useState([]);
     const [_window, setWindow] = useState(null);
-    const [plan, setPlan] = useState(() => getStorage("last_opened"));
-    const [planData, setPlanData] = useState(default_plan);
-    const [titles, setTitles] = useState(() => ({[plan]: planData.title}));
+    const [plan, setPlan] = usePlan("last_opened");
+    const [planData, setPlanData] = useBC("plan_data", default_plan, plan, false);
+    const [titles, setTitles] = useBC("titles", () => ({[plan]: planData.title}));
     const [theme, setTheme] = useLS("theme");
     const [ready, setReady] = useState(false);
     const addNotif = notif => setNotifs(notifs => [...notifs, notif]);
-    const switchPlan = index => {
-        setPlan(index);
-        setStorage("last_opened", index);
-    };
 
     loader.onmessage = event => {
         const message = event.data;
@@ -95,11 +89,15 @@ export default function App() {
                 case "init":
                     setTitles(message.titles);
                 case "select":
-                    switchPlan(message.plan);
+                    setPlan(message.plan);
                     setPlanData(message.content);
                     if(message.refresh) update_bc.postMessage({
-                        plan: message.plan,
-                        force: true
+                        plan: message.init_plan,
+                        titles: message.titles,
+                        content: {
+                            plan: message.plan,
+                            plan_data: message.content
+                        }
                     });
                     break;
                 case "export":
@@ -112,28 +110,29 @@ export default function App() {
                     URL.revokeObjectURL(link);
                     break;
                 case "import":
-                    switchPlan(message.plan);
+                    setPlan(message.plan);
                     setPlanData(message.content);
                 case "copy":
                 case "add":
                     setTitles({...titles, [message.plan]: message.content.title});
                     break;
                 case "delete":
-                    let new_titles = {...titles};
-                    delete new_titles[message.plan];
+                    const init_plan = message.plan;
+                    const new_titles = {...titles};
+                    delete new_titles[init_plan];
                     setTitles(new_titles);
                     if(plan === message.plan) syncer.postMessage({
                         type: "select",
+                        titles: new_titles,
                         plan: +Object.keys(new_titles)[0],
+                        init_plan: init_plan,
                         refresh: true
                     });
                     break;
                 case "update":
-                    const content = message.content;
                     update_bc.postMessage({
                         plan: message.plan,
-                        props: Object.keys(content),
-                        content: content
+                        content: message.content
                     });
             }
         } else {
@@ -145,10 +144,10 @@ export default function App() {
                 } else {
                     switch(message.type) {
                         case "init":
-                            notif_msg = "Failed to load previous plans due to an unknown reason."
+                            notif_msg = "Failed to load previous plans due to an unknown reason.";
                             break;
                         case "query":
-                            notif_msg = "Failed to load plan due to an unknown reason."
+                            notif_msg = "Failed to load plan due to an unknown reason.";
                             break;
                         default:
                             notif_msg = "Failed to save plan due to an unknown reason.";
@@ -173,7 +172,7 @@ export default function App() {
 
     return <div className="wrapper" data-theme={theme}>
     <Notifs.Provider value={[notifs, addNotif, _window, setWindow]}>
-    <Plan.Provider value={[plan, planData, titles]}>
+    <Plan.Provider value={[plan, planData, titles, setTitles]}>
     <Theme.Provider value={[theme, setTheme]}>
         <Main></Main>
         <NotifManager notifs={notifs}></NotifManager>

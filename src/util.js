@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer, useState } from "react";
+import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { Plan, default_info, default_plan, syncer, update_bc } from "./App";
 
 // Custom Hooks
@@ -15,56 +15,69 @@ export function setStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
 }
 
-// Note: These two hooks gives the caller the ownership of the localStorage prop.
-// Calling them more than once for the same prop in different components can lead to bugs.
-export function useLS(key) {
-    const [value, setValue] = useState(() => getStorage(key));
-    useEffect(() => update_bc.addEventListener("message", event => {
-        const message = event.data;
-        if(message.plan === null && key in message.props) setValue(message.content[key]);
-    }), []);
-    return [value, value => {
-        setValue(value);
-        setStorage(key, value);
-        update_bc.postMessage({
-            plan: null,
-            props: [key],
-            content: {[key]: value}
+export function useBC(
+    key,
+    defaultValue = null,
+    plan = null,
+    broadcast = true,
+    getProp = (key, content) => content[key]
+) {
+    const [value, setValue] = useState(defaultValue);
+    const bindedPlan = useRef();
+    bindedPlan.current = plan;
+    useEffect(() => {
+        const onMessage = event => {
+            const message = event.data;
+            if(message.plan === bindedPlan.current && key in message.content) {
+                setValue(getProp(key, message.content));
+            }
+        };
+        update_bc.addEventListener("message", onMessage);
+        return () => update_bc.removeEventListener("message", onMessage);
+    }, []);
+    return [value, (updater, callback = () => {}) => setValue(prev_value => {
+        const new_value = typeof updater === "function" ? updater(prev_value) : updater;
+        if(broadcast) update_bc.postMessage({
+            plan: plan,
+            content: {[key]: new_value}
         });
-    }];
+        callback(new_value);
+        return new_value;
+    })];
+}
+// Note: The hooks below gives the caller the ownership of the localStorage prop.
+// Calling them more than once for the same prop in different components can lead to bugs.
+export function usePlan(key) { //self-bind LS
+    const [plan, setPlan] = useState(() => getStorage(key));
+    const plan_ref = useRef();
+    plan_ref.current = plan;
+    useEffect(() => {
+        const onMessage = event => {
+            const message = event.data;
+            if(message.plan === plan_ref.current && "plan" in message.content) setPlan(message.content.plan);
+        };
+        update_bc.addEventListener("message", onMessage);
+        return () => update_bc.removeEventListener("message", onMessage);
+    }, []);
+    return [plan, setPlan];
+}
+export function useLS(key) {
+    const [value, setValue] = useBC(key, () => getStorage(key));
+    return [value, updater => setValue(updater, new_value => setStorage(key, new_value))];
+}
+function get_prop(key, plan_data) {
+    let saved = plan_data[key];
+    return saved === undefined ? default_plan[key] : saved;
 }
 export function useDB(key) {
     const [plan, planData] = useContext(Plan);
-    const [value, setValue] = useState(() => {
-        const saved = planData[key];
-        return saved === undefined ? default_plan[key] : saved;
-    });
-    useEffect(() => setValue(planData[key]), [plan, planData]);
-    useEffect(() => update_bc.addEventListener("message", event => {
-        const message = event.data;
-        if(message.plan === plan && (message.force || key in message.props)) {
-            setValue(message.content);
-        }
-    }), []);
-    return [value, updater => {
-        if(typeof updater === "function") setValue(prev_value => {
-            const new_value = updater(prev_value);
-            syncer.postMessage({
-                type: "update",
-                plan: plan,
-                content: {[key]: new_value}
-            });
-            return new_value;
-        });
-        else {
-            setValue(updater);
-            syncer.postMessage({
-                type: "update",
-                plan: plan,
-                content: {[key]: updater}
-            });
-        }
-    }];
+    const [value, setValue] = useBC(key, () => get_prop(key, planData), plan, true, get_prop);
+    useEffect(() => setValue(get_prop(key, planData)), [plan, planData]);
+    return [value, updater => setValue(updater, new_value => syncer.postMessage({
+        type: "update",
+        plan: plan,
+        content: {[key]: new_value}
+    }))];
 }
 
 export function useSync(ext) {

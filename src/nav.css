@@ -10,9 +10,6 @@
     border-top: 1px solid var(--lightcolor);
     border-bottom: none;
 }
-#root > .wrapper > .nav .btn-group {
-    gap: 8px;
-}
 
 .theme-btn {
     --color: orange;

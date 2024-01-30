@@ -203,13 +203,21 @@ function Plans({current, active, setActive, main}) {
 }
 
 export default function Nav() {
+    const [plan,,,setTitles] = useContext(Plan);
     const [title, setTitle] = useDB("title");
     return <div className="container nav">
         <div className="btn-group">
             <MenuButton><Menus></Menus></MenuButton>
             <ThemeButton></ThemeButton>
         </div>
-        <TitleInput value={title} setValue={setTitle}></TitleInput>
+        <TitleInput value={title} setValue={title => {
+            setTitle(title);
+            setTitles(titles => {
+                const new_titles = {...titles};
+                new_titles[plan] = title;
+                return new_titles;
+            });
+        }}></TitleInput>
         <MenuButton><Plans current={title}></Plans></MenuButton>
     </div>;
 }

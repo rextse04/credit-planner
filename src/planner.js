@@ -96,7 +96,6 @@ export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle
                 onDoubleClick={() => {
                     const code = course.code;
                     const ref = window.courses[code];
-                    console.log(code, ref, "call");
                     if(ref !== undefined) setWindow({
                         title: "Course information",
                         content: <CourseWindow code={code} _ref={ref}></CourseWindow>

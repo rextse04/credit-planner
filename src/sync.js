@@ -1,8 +1,9 @@
 import { Dexie } from "dexie";
 
 const db = new Dexie("main");
-db.version(1).stores({
-    plans: "++index, title, startSem, sems"
+db.version(2).stores({
+    plans: "++index, title, startSem, sems",
+    reqs: "++index, title"
 });
 
 // eslint-disable-next-line no-restricted-globals
@@ -78,8 +79,12 @@ self.onmessage = async event => {
                     }
                 };
                 reader.onerror = () => {
-                    response.status = false;
-                    response.error = "File read failed.";
+                    // eslint-disable-next-line no-restricted-globals
+                    self.postMessage({
+                        ...message,
+                        status: false,
+                        error: "File read failed"
+                    });
                 }
                 reader.readAsText(message.content);
                 return;
@@ -93,6 +98,7 @@ self.onmessage = async event => {
                 break;
             case "update":
                 await db.plans.update(message.plan, message.content);
+                break;
         }
     } catch(e) {
         response.status = false;

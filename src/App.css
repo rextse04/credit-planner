@@ -49,7 +49,7 @@ a.button {
 .icon-btn:is(:hover, :active, .active):not(.off) {
     color: var(--color);
 }
-.icon-btn:disabled {
+.icon-btn:disabled:disabled {
     color: gray;
     cursor: default;
 }
@@ -155,7 +155,13 @@ p {
 .nav-group, .btn-group {
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+.nav-group.small, .btn-group.small {
     gap: 5px;
+}
+.nav-group.large, .btn-group.large {
+    gap: 15px;
 }
 
 .field {
