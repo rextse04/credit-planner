@@ -66,13 +66,23 @@ export default function App() {
         const message = event.data;
         if(message.status) {
             window[message.name] = message.content;
-            if(message.name === "courses" && message.update) addNotif({
-                type: 1,
-                message: "Course listings updated. You may want to recheck your plan(s)."
-            });
+            if(message.update) switch(message.name) {
+                case "courses":
+                    addNotif({
+                        type: 1,
+                        message: "Course listings updated. You may want to recheck your plan(s)."
+                    });
+                    break;
+                case "reqs":
+                    addNotif({
+                        type: 1,
+                        message: "Default requirement blocks updated."
+                    });
+            }
         } else {
             if(message.name === undefined) {
                 window.courses = {};
+                window.reqs = {};
             } else window[message.name] = {};
             addNotif({
                 type: 2,
@@ -84,83 +94,99 @@ export default function App() {
     syncer.onmessage = event => {
         const message = event.data;
         if(message.type === "init") setReady(true);
-        if(message.status) {
-            switch(message.type) {
-                case "init":
-                    setTitles(message.titles);
-                case "select":
-                    setPlan(message.plan);
-                    setPlanData(message.content);
-                    if(message.refresh) update_bc.postMessage({
-                        plan: message.init_plan,
-                        titles: message.titles,
-                        content: {
-                            plan: message.plan,
-                            plan_data: message.content
-                        }
-                    });
-                    break;
-                case "export":
-                    const file = new File([message.content], message.filename);
-                    const link = URL.createObjectURL(file);
-                    const a = document.createElement("a");
-                    a.href = link;
-                    a.download = message.filename;
-                    a.click();
-                    URL.revokeObjectURL(link);
-                    break;
-                case "import":
-                    setPlan(message.plan);
-                    setPlanData(message.content);
-                case "copy":
-                case "add":
-                    setTitles({...titles, [message.plan]: message.content.title});
-                    break;
-                case "delete":
-                    const init_plan = message.plan;
-                    const new_titles = {...titles};
-                    delete new_titles[init_plan];
-                    setTitles(new_titles);
-                    if(plan === message.plan) syncer.postMessage({
-                        type: "select",
-                        titles: new_titles,
-                        plan: +Object.keys(new_titles)[0],
-                        init_plan: init_plan,
-                        refresh: true
-                    });
-                    break;
-                case "update":
-                    update_bc.postMessage({
+        if(message.status) switch(message.type) {
+            case "init":
+                setTitles(message.titles);
+            case "select":
+                setPlan(message.plan);
+                setPlanData(message.content);
+                if(message.refresh) update_bc.postMessage({
+                    plan: message.init_plan,
+                    titles: message.titles,
+                    content: {
                         plan: message.plan,
-                        content: message.content
-                    });
-            }
+                        plan_data: message.content
+                    }
+                });
+                break;
+            case "export":
+            case "req_export":
+                const file = new File([message.content], message.filename);
+                const link = URL.createObjectURL(file);
+                const a = document.createElement("a");
+                a.href = link;
+                a.download = message.filename;
+                a.click();
+                URL.revokeObjectURL(link);
+                break;
+            case "import":
+                setPlan(message.plan);
+                setPlanData(message.content);
+            case "copy":
+            case "add":
+                setTitles({...titles, [message.plan]: message.content.title});
+                break;
+            case "delete":
+                const init_plan = message.plan;
+                const new_titles = {...titles};
+                delete new_titles[init_plan];
+                setTitles(new_titles);
+                if(plan === message.plan) syncer.postMessage({
+                    type: "select",
+                    titles: new_titles,
+                    plan: +Object.keys(new_titles)[0],
+                    init_plan: init_plan,
+                    refresh: true
+                });
+                break;
+            case "update":
+                update_bc.postMessage({
+                    plan: message.plan,
+                    content: message.content
+                });
         } else {
             let notif_msg;
-            if(message.fail_message === undefined) {
+            if((notif_msg = message.fail_message) === undefined) {
                 const e = message.error;
-                if(e.name === "QuotaExceededError") {
+                if(e && e.name === "QuotaExceededError") {
                     notif_msg = "Storage limit exceeded. Please delete some other plans before proceeding.";
                 } else {
-                    switch(message.type) {
+                    const type = message.type;
+                    if(type.startsWith("req_")) {
+                        if(message.req === "") {
+                            notif_msg = "Requirement block title cannot be empty."
+                        } else switch(message.type) {
+                            case "req_select":
+                                notif_msg = "Failed to load requirement block due to an unknown reason.";
+                                break;
+                            case "req_delete":
+                                notif_msg = "Failed to delete requirement block due to an unknown reason.";
+                                break;
+                            default:
+                                notif_msg = "Failed to save requirement block due to an unknown reason.";
+                        }
+                    } else switch(message.type) {
                         case "init":
                             notif_msg = "Failed to load previous plans due to an unknown reason.";
                             break;
-                        case "query":
+                        case "select":
                             notif_msg = "Failed to load plan due to an unknown reason.";
+                            break;
+                        case "delete":
+                            notif_msg = "Failed to delete plan due to an unknown reason.";
                             break;
                         default:
                             notif_msg = "Failed to save plan due to an unknown reason.";
                     }
                 }
                 console.error(e);
-            } else notif_msg = message.fail_message;
+            }
             addNotif({
                 type: 2,
                 message: notif_msg
             });
         }
-    }
+    };
     useEffect(() => {
         loader.postMessage({target: catalog_url});
         syncer.postMessage({

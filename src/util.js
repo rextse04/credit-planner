@@ -35,9 +35,9 @@ export function useBC(
         update_bc.addEventListener("message", onMessage);
         return () => update_bc.removeEventListener("message", onMessage);
     }, []);
-    return [value, (updater, callback = () => {}) => setValue(prev_value => {
+    return [value, (updater, bc = true, callback = () => {}) => setValue(prev_value => {
         const new_value = typeof updater === "function" ? updater(prev_value) : updater;
-        if(broadcast) update_bc.postMessage({
+        if(broadcast && bc) update_bc.postMessage({
             plan: plan,
             content: {[key]: new_value}
         });
@@ -63,7 +63,7 @@ export function usePlan(key) { //self-bind LS
 }
 export function useLS(key) {
     const [value, setValue] = useBC(key, () => getStorage(key));
-    return [value, updater => setValue(updater, new_value => setStorage(key, new_value))];
+    return [value, updater => setValue(updater, true, new_value => setStorage(key, new_value))];
 }
 function get_prop(key, plan_data) {
     let saved = plan_data[key];
@@ -73,7 +73,7 @@ export function useDB(key) {
     const [plan, planData] = useContext(Plan);
     const [value, setValue] = useBC(key, () => get_prop(key, planData), plan, true, get_prop);
     useEffect(() => setValue(get_prop(key, planData)), [plan, planData]);
-    return [value, updater => setValue(updater, new_value => syncer.postMessage({
+    return [value, updater => setValue(updater, true, new_value => syncer.postMessage({
         type: "update",
         plan: plan,
         content: {[key]: new_value}

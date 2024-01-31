@@ -1,9 +1,18 @@
-import { useContext, useEffect, useReducer, useRef, useState } from "react";
+import { useContext, useEffect, useId, useReducer, useRef, useState } from "react";
 import { TitleInput } from "./nav";
 import { CredRow } from "./planner";
-import { to_int, useDB, useSync } from "./util";
-import { Courses } from "./App";
+import { to_int, useBC, useDB, useSync } from "./util";
+import { Courses, Notifs, syncer } from "./App";
 import * as logic from "./logic";
+
+class req {
+    cred = 0;
+    s_cred = 0;
+    constructor(name = "New Requirements", content = new logic.andGroup()) {
+        this.name = name;
+        this.content = content;
+    }
+}
 
 function RestraintField({value, setValue, caption, error}) {
     const [local, setLocal] = useSync(value);
@@ -91,7 +100,7 @@ function ReqGroup({group, setGroup, allowDel = false}) {
     </div>;
 }
 function ReqBlock(props) {
-    const {req, setReq} = props;
+    const {req, setReq, index} = props;
     const main = useRef();
     const [maxHeight, toggleTransition] = useReducer((state, action) => {
         if(state === "auto") {
@@ -115,9 +124,36 @@ function ReqBlock(props) {
                 ...req,
                 name: value
             })}></TitleInput>
-            <button className="icon-btn cancel" title="Delete group" onClick={() => setReq(null)}>
-                <i className="fa-solid fa-trash"></i>
-            </button>
+            <div className="btn-group">
+                <button className="icon-btn" title="Update from saved"
+                    onClick={() => syncer.postMessage({
+                        type: "req_select",
+                        req: req.name,
+                        index: index
+                    })}>
+                    <i className="fa-solid fa-arrows-rotate"></i>
+                </button>
+                <button className="icon-btn" title="Save as template"
+                    onClick={() => syncer.postMessage({
+                        type: "req_add",
+                        req: req.name,
+                        content: req.content
+                    })}>
+                    <i className="fa-solid fa-floppy-disk"></i>
+                </button>
+                <button className="icon-btn" title="Export requirement block as file"
+                    onClick={() => syncer.postMessage({
+                        type: "req_export",
+                        req: req.name,
+                        content: req.content,
+                        filename: req.name + ".json"
+                    })}>
+                    <i className="fa-solid fa-download"></i>
+                </button>
+                <button className="icon-btn cancel" title="Delete group" onClick={() => setReq(null)}>
+                    <i className="fa-solid fa-trash"></i>
+                </button>
+            </div>
         </div>
         <div ref={main} className="main">
             <ReqGroup group={req.content}
@@ -140,9 +176,80 @@ function ReqBlock(props) {
         </div>
     </div>;
 }
+function ReqSelect({setReqTitles_ref}) {
+    const [reqTitles, setReqTitles] = useBC("req_names", []);
+    const [title, setTitle] = useState("");
+    const id = useId();
+    useEffect(() => syncer.postMessage({type: "req_names"}), []);
+    setReqTitles_ref.current = setReqTitles;
+    return <div className="setting req-select">
+        <div className="container form">
+            <span>Title:</span>
+            <div className="field center">
+                <input list={id} className="req-title" value={title}
+                    onChange={event => setTitle(event.target.value)}></input>
+                <datalist id={id}>
+                    {reqTitles.map(title => <option key={title} value={title}></option>)}
+                </datalist>
+                <div className="btn-group">
+                    <button className="icon-btn" title="Export requirement block as file"
+                        onClick={() => syncer.postMessage({
+                            type: "req_export",
+                            filename: title + ".json",
+                            req: title
+                        })}>
+                        <i className="fa-solid fa-download"></i>
+                    </button>
+                    <button className="icon-btn cancel" title="Delete requirement block"
+                        onClick={() => {
+                            syncer.postMessage({
+                                type: "req_delete",
+                                req: title
+                            });
+                            setTitle("");
+                        }}>
+                        <i className="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div className="container actions footer nav">
+            <button className="container block text-btn" onClick={() => syncer.postMessage({
+                type: "req_select",
+                req: title
+            })}>Confirm</button>
+        </div>
+    </div>;
+}
 export function Req({setReqToggle}) {
     const [courses] = useContext(Courses);
+    const [,,,setWindow] = useContext(Notifs);
     const [reqs, setReqs] = useDB("reqs");
+    const setReqTitles_ref = useRef(() => {});
+    useEffect(() => {
+        const onMessage = event => {
+            const message = event.data;
+            if(message.status) switch(message.type) {
+                case "req_names":
+                    setReqTitles_ref.current(message.content, false);
+                    break;
+                case "req_select":
+                    if(message.index === undefined) {
+                        setReqs(reqs => [...reqs, new req(message.req, message.content)]);
+                        setWindow(null);
+                    } else setReqs(reqs => {
+                        const new_reqs = [...reqs];
+                        new_reqs[message.index] = new req(message.req, message.content);
+                        return new_reqs;
+                    });
+                    break;
+                case "req_delete":
+                    setReqTitles_ref.current(titles => titles.filter(title => title !== message.req));
+            }
+        };
+        syncer.addEventListener("message", onMessage);
+        return () => syncer.removeEventListener("message", onMessage);
+    }, []);
     return <div className="block req">
         <div className="container nav">
             <b>Requirements</b>
@@ -157,7 +264,7 @@ export function Req({setReqToggle}) {
             </div>
         </div>
         <div className="vertical container main">
-            {reqs.map((req, i) => <ReqBlock key={i} req={req} setReq={req => {
+            {reqs.map((req, i) => <ReqBlock key={i} index={i} req={req} setReq={req => {
                 if(req === null) {
                     setReqs(reqs.toSpliced(i, 1));
                 } else {
@@ -168,15 +275,14 @@ export function Req({setReqToggle}) {
             }}></ReqBlock>)}
             <div className="large btn-group">
                 <button className="large vadd" title="Add requirements block"
-                    onClick={() => setReqs([...reqs, {
-                        name: "New Requirements",
-                        content: new logic.andGroup(),
-                        cred: 0,
-                        s_cred: 0
-                    }])}>
+                    onClick={() => setReqs([...reqs, new req()])}>
                     <i className="fa-solid fa-square-plus"></i>
                 </button>
-                <button className="large vadd" title="Use saved requirements block">
+                <button className="large vadd" title="Use saved requirements block"
+                    onClick={() => setWindow({
+                        title: "Saved requirement blocks",
+                        content: <ReqSelect setReqTitles_ref={setReqTitles_ref}></ReqSelect>
+                    })}>
                     <i className="fa-solid fa-folder-open"></i>
                 </button>
             </div>

@@ -58,7 +58,6 @@
 }
 
 .req > .main > .block > .nav:not(.footer) {
-    --color: var(--theme);
     border-top-left-radius: inherit;
     border-top-right-radius: inherit;
     background: color-mix(in srgb, var(--color) var(--light), var(--theme));
@@ -135,6 +134,10 @@
 }
 .req > .main > .block > .main > * .restraint > .field > input {
     width: 4ch;
+}
+
+.req-select > .form .req-title {
+    width: 200px;
 }
 
 .actions {

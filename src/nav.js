@@ -157,7 +157,7 @@ function Plans({current, active, setActive, main}) {
                     }}>
                     <span>{title}</span>
                     <div className="btn-group">
-                        <button title="Duplicate plan" className="icon-btn" onClick={event => {
+                        <button className="icon-btn" title="Duplicate plan" onClick={event => {
                             syncer.postMessage({
                                 type: "copy",
                                 plan: index,
@@ -167,7 +167,7 @@ function Plans({current, active, setActive, main}) {
                         }}>
                             <i className="fa-solid fa-copy"></i>
                         </button>
-                        <button className="icon-btn" onClick={event => {
+                        <button className="icon-btn" title="Export plan as file" onClick={event => {
                             syncer.postMessage({
                                 type: "export",
                                 plan: index,
@@ -177,7 +177,7 @@ function Plans({current, active, setActive, main}) {
                         }}>
                             <i className="fa-solid fa-download"></i>
                         </button>
-                        <button className="icon-btn cancel" onClick={event => {
+                        <button className="icon-btn cancel" title="Delete plan" onClick={event => {
                             syncer.postMessage({
                                 type: "delete",
                                 plan: index

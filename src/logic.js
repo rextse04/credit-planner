@@ -117,20 +117,17 @@ export function test(req, courses, past = new Set()) {
     }
 }
 export function reset(req) {
-    if(req.type === "empty" || req.type === "course") {
-        if(req.error === undefined) return req;
-        else return {...req, error: undefined};
-    } else {
-        let members = [];
+    const new_req = {...req};
+    if(req.type === "empty" || req.type === "course") delete new_req.error;
+    else {
+        const members = [];
         for(let member of req.members) members.push(reset(member));
-        return {
-            ...req,
-            members: members,
-            error: undefined,
-            error_cred: undefined,
-            error_n: undefined
-        };
+        new_req.members = members;
+        delete new_req.error;
+        delete new_req.error_cred;
+        delete new_req.error_n;
     }
+    return new_req;
 }
 export function includes(req, code) {
     if(code === undefined) return false;

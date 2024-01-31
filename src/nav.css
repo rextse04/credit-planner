@@ -70,6 +70,8 @@
     z-index: 100;
     top: calc(100% + 10px - 5px);
     width: 300px;
+    max-height: 80dvh;
+    overflow: auto;
     margin: 5px;
     background: var(--theme);
     clip-path: margin-box inset(0 0 100% 0);
@@ -83,7 +85,6 @@
 .menu-group.active > .menu {
     visibility: visible;
     clip-path: margin-box inset(0 0 0 0);
-    overflow: hidden;
 }
 .menu-group > .menu > * {
     width: 100%;

@@ -1,9 +1,10 @@
 import { Dexie } from "dexie";
+import * as logic from './logic';
 
 const db = new Dexie("main");
 db.version(2).stores({
     plans: "++index, title, startSem, sems",
-    reqs: "++index, title"
+    reqs: "name"
 });
 
 // eslint-disable-next-line no-restricted-globals
@@ -99,6 +100,51 @@ self.onmessage = async event => {
             case "update":
                 await db.plans.update(message.plan, message.content);
                 break;
+
+            case "req_names":
+                response.content = [];
+                await db.reqs.each(req => response.content.push(req.name));
+                break;
+            case "req_select":
+                const req = await db.reqs.get(message.req);
+                if(req === undefined) {
+                    response.status = false;
+                    response.fail_message = "Requirement block does not exist.";
+                } else response.content = req.content;
+                break;
+            case "req_export":
+            {
+                let raw = undefined;
+                if("content" in message) raw = {
+                    name: message.req,
+                    content: message.content
+                };
+                else if("req" in message) raw = await db.reqs.get(message.req);
+                if(raw === undefined) {
+                    response.status = false;
+                    response.fail_message = "Requirement block does not exist.";
+                } else response.content = JSON.stringify(raw);
+                break;
+            }
+            case "req_add":
+                response.req = await db.reqs.put({
+                    name: message.req,
+                    content: message.content
+                });
+                break;
+            case "req_delete":
+                const name = message.req;
+                await db.transaction("rw", db.reqs, async () => {
+                    if(await db.reqs.where({name: name}).count()) {
+                        await db.reqs.delete(name);
+                    } else {
+                        response.status = false;
+                        response.fail_message = "Requirement block does not exist.";
+                    }
+                });
+                break;
+            case "req_update":
+                await db.reqs.update(message.req, message.content);
         }
     } catch(e) {
         response.status = false;

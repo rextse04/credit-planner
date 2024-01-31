@@ -183,6 +183,10 @@ p {
     flex-direction: row;
 }
 
+.center {
+    align-items: center;
+}
+
 .medium {
     font-size: 20px;
 }
