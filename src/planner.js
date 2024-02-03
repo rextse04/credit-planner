@@ -1,5 +1,6 @@
 import { Children, useContext, useMemo } from "react";
-import { condense, parseSeason, parseSem, to_int, useDB, useSync, useSyncReducer } from "./util";
+import { useDB, useSync, useSyncReducer } from "./hooks";
+import { condense, parseSeason, parseSem, to_int } from "./util";
 import { Courses, Notifs } from "./App";
 import * as util from "./planner_util";
 import * as logic from "./logic";

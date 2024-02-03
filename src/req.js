@@ -1,7 +1,8 @@
 import { useContext, useEffect, useId, useReducer, useRef, useState } from "react";
 import { TitleInput } from "./nav";
 import { CredRow } from "./planner";
-import { to_int, useBC, useDB, useSync } from "./util";
+import { useBC, useDB, useSync } from "./hooks";
+import { to_int } from "./util";
 import { Courses, Notifs, syncer } from "./App";
 import * as logic from "./logic";
 
@@ -26,6 +27,7 @@ function RestraintField({value, setValue, caption, error}) {
             onBlur={event => setValue(to_int(event.target.value))}></input>
     </div>;
 }
+
 function ReqGroup({group, setGroup, allowDel = false}) {
     var rows = [];
     for(let i = 0; i < group.members.length; ++i) {
@@ -48,8 +50,8 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             </tr>);
         }
     }
-    var pushMember = member => {
-        var new_members = [...group.members];
+    const pushMember = member => {
+        const new_members = [...group.members];
         new_members.push(member);
         setGroup({
             ...group,
@@ -99,6 +101,7 @@ function ReqGroup({group, setGroup, allowDel = false}) {
         </div>}
     </div>;
 }
+
 function ReqBlock(props) {
     const {req, setReq, index} = props;
     const main = useRef();
@@ -176,12 +179,53 @@ function ReqBlock(props) {
         </div>
     </div>;
 }
-function ReqSelect({setReqTitles_ref}) {
+
+function ReqRenameWindow({name, content}) {
+    const [choice, setChoice] = useState();
+    const [newName, setNewName] = useState("");
+    const group = useId();
+    const first = useId();
+    const second = useId();
+    return <div className="setting">
+        <div className="vertical start container">
+            <p>The name of the imported template, <i>{name}</i>, already exists.</p>
+            <fieldset onChange={event => {
+                if(event.target.type === "radio") setChoice(event.target.value);
+            }}>
+                <legend>Choose an option:</legend>
+                <div className="field center">
+                    <input type="radio" id={first} name={group} required
+                        value="0" checked={choice === "0"}></input>
+                    <label htmlFor={first}>Replace existing template</label>
+                </div>
+                <div className="field center">
+                    <input type="radio" id={second} name={group} required
+                        value="1" checked={choice === "1"}></input>
+                    <div className="field">
+                        <label htmlFor={second}>Enter a new name for the imported template:</label>
+                        <input className="req-title" value={newName}
+                            onChange={event => setNewName(event.target.value)}
+                            onFocus={() => setChoice("1")}></input>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div className="container actions footer nav">
+            <button className="container block text-btn" onClick={() => syncer.postMessage({
+                type: "req_add",
+                req: newName,
+                content: content,
+                force: choice === "0"
+            })}>Confirm</button>
+        </div>
+    </div>;
+}
+function ReqSelect({setReqNames_ref}) {
     const [reqTitles, setReqTitles] = useBC("req_names", []);
     const [title, setTitle] = useState("");
     const id = useId();
     useEffect(() => syncer.postMessage({type: "req_names"}), []);
-    setReqTitles_ref.current = setReqTitles;
+    setReqNames_ref.current = setReqTitles;
     return <div className="setting req-select">
         <div className="container form">
             <span>Title:</span>
@@ -223,15 +267,15 @@ function ReqSelect({setReqTitles_ref}) {
 }
 export function Req({setReqToggle}) {
     const [courses] = useContext(Courses);
-    const [,,,setWindow] = useContext(Notifs);
+    const [,addNotif,,setWindow] = useContext(Notifs);
     const [reqs, setReqs] = useDB("reqs");
-    const setReqTitles_ref = useRef(() => {});
+    const setReqNames_ref = useRef(() => {});
     useEffect(() => {
         const onMessage = event => {
             const message = event.data;
             if(message.status) switch(message.type) {
                 case "req_names":
-                    setReqTitles_ref.current(message.content, false);
+                    setReqNames_ref.current(message.content, false);
                     break;
                 case "req_select":
                     if(message.index === undefined) {
@@ -243,8 +287,25 @@ export function Req({setReqToggle}) {
                         return new_reqs;
                     });
                     break;
+                case "req_add":
+                case "req_import":
+                    if(message.clash) setWindow({
+                        title: "Save Template",
+                        content: <ReqRenameWindow name={message.req} content={message.content}></ReqRenameWindow>
+                    });
+                    else {
+                        setReqNames_ref.current(names => [...names, message.content.name]);
+                        addNotif({
+                            type: 1,
+                            message: message.type === "req_add" ?
+                                "Template saved successfully." :
+                                "Template imported successfully."
+                        });
+                        setWindow(null);
+                    }
+                    break;
                 case "req_delete":
-                    setReqTitles_ref.current(titles => titles.filter(title => title !== message.req));
+                    setReqNames_ref.current(names => names.filter(title => title !== message.req));
             }
         };
         syncer.addEventListener("message", onMessage);
@@ -281,7 +342,7 @@ export function Req({setReqToggle}) {
                 <button className="large vadd" title="Use saved requirements block"
                     onClick={() => setWindow({
                         title: "Saved requirement blocks",
-                        content: <ReqSelect setReqTitles_ref={setReqTitles_ref}></ReqSelect>
+                        content: <ReqSelect setReqNames_ref={setReqNames_ref}></ReqSelect>
                     })}>
                     <i className="fa-solid fa-folder-open"></i>
                 </button>

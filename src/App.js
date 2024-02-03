@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import Nav from "./nav";
 import Planner from "./planner";
 import NotifManager from "./notif";
-import { useBC, useDB, useLS, usePlan } from "./util";
+import { useBC, useDB, useLS, usePlan } from "./hooks";
 import { Req } from "./req";
 import Window from "./window";
 import LoadingScreen from "./loading";
@@ -122,6 +122,10 @@ export default function App() {
             case "import":
                 setPlan(message.plan);
                 setPlanData(message.content);
+                addNotif({
+                    type: 1,
+                    message: "Plan imported sucessfully."
+                });
             case "copy":
             case "add":
                 setTitles({...titles, [message.plan]: message.content.title});
@@ -146,8 +150,8 @@ export default function App() {
                 });
         } else {
             let notif_msg;
+            const e = message.error;
             if((notif_msg = message.fail_message) === undefined) {
-                const e = message.error;
                 if(e && e.name === "QuotaExceededError") {
                     notif_msg = "Storage limit exceeded. Please delete some other plans before proceeding.";
                 } else {
@@ -179,12 +183,12 @@ export default function App() {
                             notif_msg = "Failed to save plan due to an unknown reason.";
                     }
                 }
-                console.error(e);
             }
             addNotif({
                 type: 2,
                 message: notif_msg
             });
+            console.error(e);
         }
     };
     useEffect(() => {

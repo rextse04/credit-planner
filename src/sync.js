@@ -1,4 +1,5 @@
 import { Dexie } from "dexie";
+import { read_import } from "./util";
 import * as logic from './logic';
 
 const db = new Dexie("main");
@@ -63,32 +64,15 @@ self.onmessage = async event => {
                 });
                 break;
             case "import":
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    try {
-                        response.content = JSON.parse(reader.result);
-                        response.plan = await db.plans.add(response.content);
-                    } catch(e) {
-                        if(e instanceof SyntaxError) {
-                            response.status = false;
-                            response.fail_message = "The provided file failed to be parsed. Please check if it is corrupted.";
-                        }
-                        else throw e;
-                    } finally {
-                        // eslint-disable-next-line no-restricted-globals
-                        self.postMessage(response);
-                    }
-                };
-                reader.onerror = () => {
-                    // eslint-disable-next-line no-restricted-globals
-                    self.postMessage({
-                        ...message,
-                        status: false,
-                        error: "File read failed"
-                    });
+                try {
+                    const content = await read_import(message.content);
+                    response.plan = await db.plans.add(content);
+                    response.content = content;
+                } catch(e) {
+                    response.status = false;
+                    response.fail_message = e;
                 }
-                reader.readAsText(message.content);
-                return;
+                break;
             case "delete":
                 await db.transaction("rw", db.plans, async () => {
                     if(await db.plans.count() === 1) {
@@ -117,7 +101,7 @@ self.onmessage = async event => {
                 let raw = undefined;
                 if("content" in message) raw = {
                     name: message.req,
-                    content: message.content
+                    content: logic.reset(message.content)
                 };
                 else if("req" in message) raw = await db.reqs.get(message.req);
                 if(raw === undefined) {
@@ -126,10 +110,33 @@ self.onmessage = async event => {
                 } else response.content = JSON.stringify(raw);
                 break;
             }
+            case "req_import":
+            {
+                try {
+                    const req = await read_import(message.content);
+                    response.req = message.req = req.name;
+                    try {
+                        response.content = message.content = logic.reset(req.content);
+                    } catch {
+                        throw "The provided file seems to be corrupted.";
+                    }
+                } catch(e) {
+                    response.status = false;
+                    response.fail_message = e;
+                    break;
+                }
+            }
             case "req_add":
-                response.req = await db.reqs.put({
-                    name: message.req,
-                    content: message.content
+                await db.transaction("rw", db.reqs, async () => {
+                    if(!message.force && await db.reqs.where({name: message.req}).count()) {
+                        response.clash = true;
+                    } else {
+                        await db.reqs.put({
+                            name: message.req,
+                            content: message.content
+                        });
+                        response.clash = false;
+                    }
                 });
                 break;
             case "req_delete":

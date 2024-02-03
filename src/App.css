@@ -93,6 +93,17 @@ input[type=number] {
     -webkit-appearance: textfield;
     appearance: textfield;
 }
+fieldset {
+    --grp-color: var(--color);
+    border-color: color-mix(in srgb, var(--grp-color) var(--light), var(--theme));
+    border-style: solid;
+}
+fieldset:focus-within {
+    border-color: var(--grp-color);
+}
+:not(fieldset):invalid {--color: red}
+fieldset:invalid {--grp-color: red}
+
 .input-wrapper {
     display: flex;
     align-items: center;
@@ -183,9 +194,9 @@ p {
     flex-direction: row;
 }
 
-.center {
-    align-items: center;
-}
+.start {align-items: start;}
+.center {align-items: center;}
+.end {align-items: end;}
 
 .medium {
     font-size: 20px;

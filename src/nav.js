@@ -1,5 +1,6 @@
 import { Children, cloneElement, useContext, useEffect, useRef, useState } from "react";
-import { useForceUpdate, useDB, useSync } from "./util";
+import { useForceUpdate, useDB, useSync } from "./hooks";
+import { req_file } from "./util";
 import { Courses, Notifs, Plan, Theme, default_plan, syncer } from "./App";
 import { check_plan } from "./planner_util";
 
@@ -24,19 +25,24 @@ function Menus({active, setActive}) {
             <i className="fa-solid fa-bars"></i>
         </button>
         <div className="block left menu menu-menu">
-            <button className="text-btn text-icon container" onClick={() => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = ".json";
-                input.onchange = event => syncer.postMessage({
+            <button className="text-btn text-icon container" onClick={async () => {
+                syncer.postMessage({
                     type: "import",
-                    content: event.target.files[0]
+                    content: await req_file()
                 });
-                input.click();
                 setActive(false);
             }}>
                 <i className="icon fa-solid fa-file-import"></i>
                 <span className="text">Import from file</span>
+            </button>
+            <button className="text-btn text-icon container" onClick={async () => {
+                syncer.postMessage({
+                    type: "req_import",
+                    content: await req_file()
+                });
+            }}>
+                <i className="icon fa-solid fa-file-import"></i>
+                <span className="text">Import template</span>
             </button>
             <button className="text-btn text-icon container">
                 <i className="icon fa-solid fa-file-excel"></i>
