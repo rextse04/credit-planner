@@ -66,7 +66,7 @@ function Menus({active, setActive}) {
                         <p><a href="https://github.com/rextse04/credit-planner">Source code</a></p>
                         <p>To report a bug or make a suggestion, you can submit an issue to the Github project linked above
                             or use this form.</p>
-                        <div className="hmid"></div>
+                        <hr></hr>
                         <p>
                             Permission is hereby granted, free of charge, to any person obtaining a copy
                             of this software and associated documentation files (the "Software"), to deal
@@ -106,18 +106,18 @@ function ThemeButton() {
         setTheme(theme);
         setJust(true);
     };
-    const onMouseLeave = () => setJust(false);
+    const onPointerLeave = () => setJust(false);
     let className = "icon-btn theme-btn " + (just ? "off " : "");
     switch(theme) {
         case 1:
             return <button className={className + "dark"} title="Switch to light mode"
-                onClick={gen_onClick(0)} onMouseLeave={onMouseLeave}>
+                onClick={gen_onClick(0)} onPointerLeave={onPointerLeave}>
                 <i className="fa-regular fa-lightbulb"></i>
             </button>;
         case 0:
         default:
             return <button className={className + "light"} title="Switch to dark mode"
-                onClick={gen_onClick(1)} onMouseLeave={onMouseLeave}>
+                onClick={gen_onClick(1)} onPointerLeave={onPointerLeave}>
                 <i className="fa-solid fa-lightbulb"></i>
             </button>;
     }
@@ -148,7 +148,7 @@ function Plans({current, active, setActive, main}) {
             onClick={() => setActive(active => !active)}>
             <i className="fa-solid fa-box-archive"></i>
         </button>
-        <div className="container block right menu plans-menu">
+        <div className="vertical container block right menu plans-menu">
             {Object.keys(titles).map(index => {
                 index = +index;
                 const title = plan === index ? current : titles[index];

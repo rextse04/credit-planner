@@ -14,6 +14,8 @@
     display: flex;
 }
 .window-manager > .window {
+    display: flex;
+    flex-direction: column;
     background: var(--theme);
     min-width: 300px;
     min-height: 200px;

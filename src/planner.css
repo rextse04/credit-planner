@@ -21,46 +21,47 @@
     }
 }
 .planner > .main {
-    min-height: 0;
-    overflow-y: auto;
+    overflow: auto;
     padding: 5px; /* Adjust for shadow*/
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 10px;
 }
-.planner > .main [class="block"] {
+.planner > .main > .block-wrapper > .block {
     max-width: 350px;
 }
-.planner > .main [class="block"] .add {
-    --color: brown;
-}
 
-table.cred-tb {
+.cred-tb {
     width: 100%;
     table-layout: fixed;
     border-spacing: 2px 0;
 }
-table.cred-tb, table.cred-tb :is(tr, th, td) {
+.cred-tb, .cred-tb :is(tr, th, td) {
     border: none;
     text-align: left;
 }
-table.cred-tb th.toggle {
+.cred-tb .toggle {
     width: 18px;
 }
-table.cred-tb th.code {
+.cred-tb .code {
     width: 10ch;
 }
-table.cred-tb th.cred {
+.cred-tb .cred {
     width: 4ch;
 }
-table.cred-tb th.del {
+.cred-tb .del {
     width: 18px;
 }
-table.cred-tb td > input:not([type=checkbox]) {
+.cred-tb > thead > tr::after {
+    content: "";
+    display: table-cell;
+    width: 0;
+}
+.cred-tb td > input:not([type=checkbox]) {
     width: 100%;
     text-overflow: ellipsis;
 }
-table.cred-tb td:last-child {
+.cred-tb td:last-child {
     text-align: center;
 }
 
@@ -88,4 +89,25 @@ table.cred-tb td:last-child {
 }
 .sem-setting > .form .sems {
     width: 4ch;
+}
+
+.cred-tb > tbody tr.drag {
+    position: fixed;
+}
+.cred-tb tr.drag-over {
+    position: relative;
+}
+.cred-tb tr.drag-over::after {
+    content: ">";
+    position: absolute;
+    right: calc(100% + 3px);
+    color: var(--add-color);
+}
+.cred-tb tr.drag-over.before::after {
+    top: 0;
+    transform: translateY(-50%);
+}
+.cred-tb tr.drag-over.after::after {
+    bottom: 0;
+    transform: translateY(50%);
 }

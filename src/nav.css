@@ -100,9 +100,6 @@
     gap: 5px;
     max-width: 100%;
 }
-.plans-menu > .add {
-    --color: purple;
-}
 
 .menu-menu > * {
     display: grid;

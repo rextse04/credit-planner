@@ -122,27 +122,18 @@ p {
     box-sizing: border-box;
 }
 .block {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     border-radius: 5px;
     box-shadow: var(--shadow);
 }
 
-.hmid {
+hr {
     height: 1px;
     width: 80%;
-}
-.vmid {
-    width: 1px;
-    height: 80%;
-}
-.hmid, .vmid {
-    background: var(--lightcolor);
-    margin: 2px 0;
+    background-color: var(--color);
 }
 
-.add {
+button.add {
+    --color: var(--add-color, inherit);
     --btn-line-color: var(--lightcolor);
     width: 100%;
     display: flex;
@@ -153,10 +144,10 @@ p {
         transparent calc(50% + 1px)
     );
 }
-.add:hover {
+button.add:hover {
     --btn-line-color: var(--color);
 }
-.add > .main {
+button.add > .main {
     background: var(--theme);
 }
 .info {--color: cornflowerblue !important}
@@ -227,10 +218,12 @@ p {
     color: white;
 }
 #root > .wrapper > .nav {
+    --add-color: purple;
     height: var(--nav-height);
     font-size: larger;
 }
 #root > .wrapper > .main {
+    --add-color: brown;
     --planner-dim: 60%;
     height: calc(100% - var(--nav-height));
     padding: 10px;

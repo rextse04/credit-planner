@@ -24,7 +24,7 @@
 .req > .main {
     width: 100%;
     height: calc(100% - var(--nav-height) * 2 - var(--gap) * 2);
-    overflow: auto;
+    overflow-y: auto;
     box-sizing: border-box;
     gap: 10px;
 }

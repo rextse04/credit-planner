@@ -31,9 +31,9 @@ function RestraintField({value, setValue, caption, error}) {
 function ReqGroup({group, setGroup, allowDel = false}) {
     var rows = [];
     for(let i = 0; i < group.members.length; ++i) {
-        let member = group.members[i];
-        let setSubCourse = new_member => {
-            var new_members = [...group.members];
+        const member = group.members[i];
+        const setSubCourse = new_member => {
+            const new_members = [...group.members];
             if(new_member === null) new_members.splice(i, 1);
             else new_members[i] = new_member;
             setGroup({
@@ -41,8 +41,13 @@ function ReqGroup({group, setGroup, allowDel = false}) {
                 members: new_members
             });
         }
+        const insertSubCourse = (p, member) => setGroup({
+            ...group,
+            members: group.members.toSpliced(i+p, 0, logic.course.from_entry(member))
+        });
         if(member.type === "course") {
-            rows.push(<CredRow key={i} hasToggle={true} subCourse={member} setSubCourse={setSubCourse}>
+            rows.push(<CredRow key={i} hasToggle={true}
+                subCourse={member} setSubCourse={setSubCourse} insertSubCourse={insertSubCourse}>
             </CredRow>);
         } else {
             rows.push(<tr key={i}>
@@ -106,11 +111,8 @@ function ReqBlock(props) {
     const {req, setReq, index} = props;
     const main = useRef();
     const [maxHeight, toggleTransition] = useReducer((state, action) => {
-        if(state === "auto") {
-            return main.current.offsetHeight + "px";
-        } else {
-            return "auto";
-        }
+        if(state === "auto") return main.current.offsetHeight + "px";
+        else return "auto";
     }, "auto");
     const [collapsed, setCollapsed] = useState(false);
     useEffect(() => {

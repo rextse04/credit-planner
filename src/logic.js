@@ -11,6 +11,13 @@ export class course extends req_base {
     code = "";
     name = "";
     cred = 0;
+    static from_entry(entry) {
+        const out = new course();
+        out.code = entry.code;
+        out.name = entry.name;
+        out.cred = entry.cred;
+        return out;
+    }
 }
 export class group extends req_base {
     members = [];

@@ -8,8 +8,8 @@ db.version(1).stores({
 // eslint-disable-next-line no-restricted-globals
 self.onmessage = async event => {
     const message = event.data;
-    const response = await fetch(message.target);
     try {
+        const response = await fetch(message.target);
         if(response.ok) {
             const catalog = await response.json();
             const names = Object.keys(catalog);

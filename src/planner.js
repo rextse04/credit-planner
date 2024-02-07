@@ -1,12 +1,11 @@
-import { Children, useContext, useMemo } from "react";
+import { Children, useContext, useMemo, useRef, useState } from "react";
 import { useDB, useSync, useSyncReducer } from "./hooks";
 import { condense, parseSeason, parseSem, to_int } from "./util";
 import { Courses, Notifs } from "./App";
 import * as util from "./planner_util";
-import * as logic from "./logic";
 
 export function Message({children}) {
-    return <div className="container block message">
+    return <div className="vertical container block message">
         {Children.map(children, line => <p>{line}</p>)}
     </div>;
 }
@@ -51,14 +50,16 @@ function get_class(message) {
     if(message === undefined || message.length === 0) return "";
     else return "has-message";
 }
-export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle = false}) {
+export function CredRow({subCourse, setSubCourse, insertSubCourse, setCode = undefined, hasToggle = false}) {
     const [,,,setWindow] = useContext(Notifs);
     const [course, setCourse] = useSyncReducer((state, action) => ({...state, ...action}), subCourse);
-    var status = "";
-    if(course.error === undefined) status = course.warn_code ? "warn" : "";
-    else status = course.error ? "error" : (course.warn_code ? "warn" : "success");
-    return <tr>
-        {hasToggle && <td>
+
+    var status = "code ";
+    if(course.error === undefined) status += course.warn_code ? "warn " : "";
+    else status += course.error ? "error " : (course.warn_code ? "warn " : "success ");
+
+    return <tr {...util.useCRDnD(course, setSubCourse, insertSubCourse)}>
+        {hasToggle && <td className="toggle">
             <div className="input-wrapper">
                 <button title={course.disabled ? "Enable course" : "Disable course"}
                     className={"icon-btn explicit " + (course.disabled ? "cancel" : "success")}
@@ -70,7 +71,7 @@ export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle
             </div>
         </td>}
         <td className={
-            status + " " + (get_class(course.message) || get_class(course.message_code) || " ")
+            status + (get_class(course.message) || get_class(course.message_code) || " ")
         }>
             <input value={course.code}
                 onChange={event => setCourse({code: condense(event.target.value)})}
@@ -78,12 +79,11 @@ export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle
                     var code = condense(event.target.value).toUpperCase();
                     const ref = window.courses[code];
                     if(setCode === undefined) {
-                        let update = {...course, code: code};
+                        const update = {...course, code: code};
                         if(code === "" || ref !== undefined) {
                             update.warn_code = false;
                             update.message_code = "";
-                        }
-                        if(code !== "" && ref === undefined) {
+                        } else {
                             update.warn_code = true;
                             update.message_code = util.msgs.unknown_code;
                         }
@@ -108,7 +108,7 @@ export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle
             </Message>
         </td>
         <td className={
-            (course.warn_name ? "warn " : "") + get_class(course.message_name)
+            "name " + (course.warn_name ? "warn " : "") + get_class(course.message_name)
         }>
             <input value={course.name}
             onChange={event => setCourse({name: event.target.value})}
@@ -128,7 +128,7 @@ export function CredRow({subCourse, setSubCourse, setCode = undefined, hasToggle
             <Message>{course.message_name}</Message>
         </td>
         <td className={
-            (course.warn_cred ? "warn " : "") + get_class(course.message_cred)
+            "cred " + (course.warn_cred ? "warn " : "") + get_class(course.message_cred)
         }>
             <input type="number" min="0" value={course.cred}
             onChange={event => setCourse({cred: event.target.value})}
@@ -207,137 +207,28 @@ function Setting({startSem, setStartSem, sems, setSems}) {
     </div>;
 }
 export function CredBlock({sem, start = false, settings = {}, subCourses, setSubCourses, subTotalCred}) {
-    const [courses, setCourses] = useContext(Courses);
+    const [,setCourses] = useContext(Courses);
     const [,,,setWindow] = useContext(Notifs);
     const sem_name = useMemo(() => parseSem(sem), [sem]);
     var rows = [];
     if(subCourses !== undefined) for(let i = 0; i < subCourses.length; ++i) {
         rows.push(<CredRow key={i} subCourse={subCourses[i]}
             setSubCourse={course => {
-                if(course === null) { // Delete course
+                if(course === null) {
                     const code = subCourses[i].code;
                     if(code === "") {
                         setSubCourses(subCourses.toSpliced(i, 1));
                         return;
                     }
-                    const new_courses = {...courses};
-                    const past = [];
-                    const set_course = util.gen_set_course.bind(new_courses);
-                    const check_course = util.gen_check_course.bind(past);
-                    let duplicate = false;
-                    new_courses[sem] = subCourses.toSpliced(i, 1);
-                    for(let sem_name in new_courses) {
-                        past.push(new_courses[sem_name]);
-                        if(sem_name >= sem) {
-                            const sub_courses = new_courses[sem_name];
-                            for(let j = 0; j < sub_courses.length; ++j) {
-                                const course = sub_courses[j];
-                                const course_code = course.code;
-                                if(sem_name === sem && course_code === code) {
-                                    if(duplicate) {
-                                        set_course(sem, j, {
-                                            error: true,
-                                            duplicate: true,
-                                            message: util.msgs.duplicate
-                                        });
-                                    } else {
-                                        const ref = window.courses[code];
-                                        let update = {
-                                            error: ref === undefined ? undefined : false,
-                                            duplicate: false
-                                        }
-                                        if(ref !== undefined) update = {...update, ...check_course(ref)};
-                                        set_course(sem, j, update);
-                                        duplicate = true;
-                                    }
-                                    continue;
-                                }
-                                const course_ref = window.courses[course_code];
-                                if(course_ref !== undefined)
-                                if(!course.duplicate && (
-                                    (sem_name !== sem && logic.includes(course_ref.prereq, code)) ||
-                                    logic.includes(course_ref.coreq, code) ||
-                                    logic.includes(course_ref.exclusion, code)
-                                )) set_course(sem_name, j, check_course(course_ref));
-                            }
-                        }
-                    }
-                    setCourses(new_courses);
+                    util.deleteCode.apply(setCourses, [sem, i, code]);
                 } else {
                     let new_subCourses = [...subCourses];
                     new_subCourses[i] = course;
                     setSubCourses(new_subCourses);
                 }
             }}
-            setCode={(code, ref) => {
-                const empty = code === "";
-                const prev_code = subCourses[i].code;
-                const prev_empty = prev_code === "";
-                const new_courses = {...courses};
-                const past = [];
-                const set_course = util.gen_set_course.bind(new_courses);
-                const check_course = util.gen_check_course.bind(past);
-                const update_course = util.gen_update_course.bind(check_course);
-                var duplicate = false;
-                var prev_duplicate = false;
-                for(let sem_name in courses) {
-                    past.push(courses[sem_name]);
-                    if(sem_name === sem) {
-                        past.at(-1)[i] = new_courses[sem][i] = update_course(code, ref, sem);
-                    }
-                    if(sem_name >= sem) {
-                        const subcourses = courses[sem_name];
-                        for(let j = 0; j < subcourses.length; ++j) {
-                            const course = subcourses[j];
-                            const course_code = course.code;
-                            if(sem_name === sem) {
-                                if(i === j) continue;
-                                else if(!empty && course_code === code) {
-                                    if(!duplicate) {
-                                        duplicate = true;
-                                        set_course(sem, i, {message: util.msgs.duplicate});
-                                    }
-                                    set_course(sem, j, {
-                                        error: true,
-                                        duplicate: true,
-                                        message: util.msgs.duplicate
-                                    });
-                                    continue;
-                                }
-                                else if(!prev_empty && course_code === prev_code) {
-                                    if(!prev_duplicate) {
-                                        set_course(sem, j, {
-                                            error: window.courses[prev_code] === undefined ? undefined : false,
-                                            duplicate: false
-                                        });
-                                        prev_duplicate = true;
-                                    }
-                                }
-                            }
-                            const course_ref = window.courses[course_code];
-                            if(!course.duplicate && course_ref !== undefined) {
-                                let check = false;
-                                if(!empty) {
-                                    check = (
-                                        (sem_name !== sem && logic.includes(course_ref.prereq, code)) ||
-                                        logic.includes(course_ref.coreq, code) ||
-                                        logic.includes(course_ref.exclusion, code)
-                                    );
-                                }
-                                if(!check && !prev_empty) {
-                                    check = (
-                                        (sem_name !== sem && logic.includes(course_ref.prereq, prev_code)) ||
-                                        logic.includes(course_ref.coreq, prev_code) ||
-                                        logic.includes(course_ref.exclusion, prev_code)
-                                    )
-                                }
-                                if(check) set_course(sem_name, j, check_course(course_ref));
-                            }
-                        }
-                    }
-                }
-                setCourses(new_courses);
-            }}>
+            setCode={util.setCode.bind(setCourses, sem, i)}
+            insertSubCourse={util.insertSubCourse.bind(setCourses, sem, i)}>
         </CredRow>);
     }
     return <div className="block-wrapper">
