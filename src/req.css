@@ -28,6 +28,10 @@
     box-sizing: border-box;
     gap: 10px;
 }
+.req > .main > .block {
+    width: 100%;
+}
+
 .vadd {
     --color: lightgray;
     background: var(--color);
@@ -62,18 +66,6 @@
     border-top-right-radius: inherit;
     background: color-mix(in srgb, var(--color) var(--light), var(--theme));
 }
-.req > .main > .block > .main {
-    max-height: var(--main-height);
-    clip-path: inset(0 0 0 0);
-
-    transition-property: max-height, clip-path;
-    transition-duration: 0.4s;
-    transition-timing-function: ease-in-out;
-}
-.req > .main > .block.collapsed > .main {
-    max-height: 0;
-    clip-path: inset(0 0 100% 0);
-}
 .req > .main > .block > .toggle {
     width: 100%;
     display: flex;
@@ -81,10 +73,11 @@
     border-top: 1px solid var(--lightcolor);
 }
 .req > .main > .block > .toggle > button {
+    transform: rotate(180deg);
     transition: transform 0.1s linear;
 }
-.req > .main > .block.collapsed > .toggle > button {
-    transform: rotate(180deg);
+.req > .main > .block.active > .toggle > button {
+    transform: none;
 }
 
 .req > .main > .block .main .sec {

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useId, useReducer, useRef, useState } from "react";
 import { TitleInput } from "./nav";
 import { CredRow } from "./planner";
-import { useBC, useDB, useSync } from "./hooks";
+import { useBC, useCollapsable, useDB, useSync } from "./hooks";
 import { to_int } from "./util";
 import { Courses, Notifs, syncer } from "./App";
 import * as logic from "./logic";
@@ -107,23 +107,9 @@ function ReqGroup({group, setGroup, allowDel = false}) {
     </div>;
 }
 
-function ReqBlock(props) {
-    const {req, setReq, index} = props;
-    const main = useRef();
-    const [maxHeight, toggleTransition] = useReducer((state, action) => {
-        if(state === "auto") return main.current.offsetHeight + "px";
-        else return "auto";
-    }, "auto");
-    const [collapsed, setCollapsed] = useState(false);
-    useEffect(() => {
-        if(maxHeight !== "auto") setCollapsed(true);
-    }, [maxHeight]);
-    useEffect(() => {
-        if(!collapsed && maxHeight !== "auto") toggleTransition();
-    }, Object.values(props));
-    
-    return <div className={"block " + (collapsed ? "collapsed" : "")}
-        style={{"--main-height": maxHeight}}>
+function ReqBlock({req, setReq, index}) {
+    const [active, toggle, pkg] = useCollapsable();
+    return <div className={"block " + (active ? "active" : "")}>
         <div className={"nav container " + logic.get_class(req.content.error)}>
             <TitleInput value={req.name} setValue={value => setReq({
                 ...req,
@@ -160,7 +146,7 @@ function ReqBlock(props) {
                 </button>
             </div>
         </div>
-        <div ref={main} className="main">
+        <div {...pkg} className="main collapsable">
             <ReqGroup group={req.content}
                 setGroup={group => setReq({...req, content: group})} allowDel={true}></ReqGroup>
         </div>
@@ -169,13 +155,7 @@ function ReqBlock(props) {
             <span>{req.s_cred}/{req.cred}</span>
         </div>
         <div className="toggle">
-            <button className="icon-btn" onClick={() => {
-                if(collapsed) setCollapsed(false);
-                else {
-                    if(maxHeight === "auto") toggleTransition();
-                    else setCollapsed(true);
-                }
-            }}>
+            <button className="icon-btn" onClick={toggle}>
                 <i className="fa-solid fa-angle-up"></i>
             </button>
         </div>

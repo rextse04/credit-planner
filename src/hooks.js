@@ -97,3 +97,31 @@ export function useSyncReducer(reducer, ext, init = undefined) {
 export function useForceUpdate() {
     return useReducer(x => x + 1, 0)[1];
 }
+
+export function useCollapsable(defaultActive = true) {
+    const main_ref = useRef();
+    const [height, updateHeight] = useReducer(() => main_ref.current.offsetHeight + "px", "auto");
+    const [loaded, setLoaded] = useState(false);
+    const [prepare, setPrepare] = useState(false);
+    const [active, setActive] = useState(defaultActive);
+    useEffect(() => {
+        if(prepare) {
+            updateHeight();
+            setActive(collapsed => !collapsed);
+            setPrepare(false);
+        }
+    }, [prepare]);
+    const toggle = new_active => {
+        if(new_active === active) return;
+        setLoaded(true);
+        updateHeight();
+        setPrepare(true);
+    };
+    return [active, toggle, {
+        ref: main_ref,
+        style: {
+            "--init-height": height,
+            animationDuration: loaded ? undefined : "0s"
+        }
+    }];
+}

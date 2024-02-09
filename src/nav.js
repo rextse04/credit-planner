@@ -1,22 +1,23 @@
 import { Children, cloneElement, useContext, useEffect, useRef, useState } from "react";
-import { useForceUpdate, useDB, useSync } from "./hooks";
+import { useForceUpdate, useDB, useSync, useCollapsable } from "./hooks";
 import { req_file } from "./util";
 import { Courses, Notifs, Plan, Theme, default_plan, syncer } from "./App";
 import { check_plan } from "./planner_util";
 
 export function MenuButton({children}) {
-    const [active, setActive] = useState(false);
-    const main = useRef();
-    return <div ref={main} className={"menu-group " + (active ? "active" : "")} tabIndex="0"
-        onBlur={event => main.current.contains(event.relatedTarget) ? undefined : setActive(false)}>
+    const [active, setActive, collapse_pkg] = useCollapsable(false);
+    const main_ref = useRef();
+    return <div ref={main_ref} className={"menu-group " + (active ? "active" : "")} tabIndex="0"
+        onBlur={event => main_ref.current.contains(event.relatedTarget) ? undefined : setActive(false)}>
         {Children.map(children, child => cloneElement(child, {
             active: active,
             setActive: setActive,
-            main: main
+            pkg: collapse_pkg,
+            main_ref: main_ref
         }))}
     </div>;
 }
-function Menus({active, setActive}) {
+function Menus({active, setActive, pkg}) {
     const [,setCourses] = useContext(Courses);
     const [,,,setWindow] = useContext(Notifs);
     return <>
@@ -24,7 +25,7 @@ function Menus({active, setActive}) {
             onClick={() => setActive(active => !active)}>
             <i className="fa-solid fa-bars"></i>
         </button>
-        <div className="block left menu menu-menu">
+        <div {...pkg} className="block collapsable left menu menu-menu">
             <button className="text-btn text-icon container" onClick={async () => {
                 syncer.postMessage({
                     type: "import",
@@ -140,7 +141,7 @@ export function TitleInput({value, setValue}) {
     </div>;
 }
 
-function Plans({current, active, setActive, main}) {
+function Plans({current, active, setActive, pkg, main_ref}) {
     const [plan,, titles] = useContext(Plan);
     return <>
         <button title="View saved plans"
@@ -148,62 +149,64 @@ function Plans({current, active, setActive, main}) {
             onClick={() => setActive(active => !active)}>
             <i className="fa-solid fa-box-archive"></i>
         </button>
-        <div className="vertical container block right menu plans-menu">
-            {Object.keys(titles).map(index => {
-                index = +index;
-                const title = plan === index ? current : titles[index];
-                return <div key={index}
-                    className={"container button frame-btn " + (plan === index ? "active" : "")}
-                    onClick={() => {
-                        syncer.postMessage({
-                            type: "select",
-                            plan: index
-                        });
-                        setActive(false);
-                    }}>
-                    <span>{title}</span>
-                    <div className="btn-group">
-                        <button className="icon-btn" title="Duplicate plan" onClick={event => {
+        <div {...pkg} className="block collapsable right menu">
+            <div className="vertical container plans-menu">
+                {Object.keys(titles).map(index => {
+                    index = +index;
+                    const title = plan === index ? current : titles[index];
+                    return <div key={index}
+                        className={"container button frame-btn " + (plan === index ? "active" : "")}
+                        onClick={() => {
                             syncer.postMessage({
-                                type: "copy",
-                                plan: index,
-                                content: {title: title + " (Copy)"}
-                            });
-                            event.stopPropagation();
-                        }}>
-                            <i className="fa-solid fa-copy"></i>
-                        </button>
-                        <button className="icon-btn" title="Export plan as file" onClick={event => {
-                            syncer.postMessage({
-                                type: "export",
-                                plan: index,
-                                filename: title + ".json"
-                            });
-                            event.stopPropagation();
-                        }}>
-                            <i className="fa-solid fa-download"></i>
-                        </button>
-                        <button className="icon-btn cancel" title="Delete plan" onClick={event => {
-                            syncer.postMessage({
-                                type: "delete",
+                                type: "select",
                                 plan: index
                             });
-                            main.current.focus();
-                            event.stopPropagation();
-                        }} disabled={Object.keys(titles).length === 1}>
-                            <i className="fa-solid fa-trash"></i>
-                        </button>
+                            setActive(false);
+                        }}>
+                        <span>{title}</span>
+                        <div className="btn-group">
+                            <button className="icon-btn" title="Duplicate plan" onClick={event => {
+                                syncer.postMessage({
+                                    type: "copy",
+                                    plan: index,
+                                    content: {title: title + " (Copy)"}
+                                });
+                                event.stopPropagation();
+                            }}>
+                                <i className="fa-solid fa-copy"></i>
+                            </button>
+                            <button className="icon-btn" title="Export plan as file" onClick={event => {
+                                syncer.postMessage({
+                                    type: "export",
+                                    plan: index,
+                                    filename: title + ".json"
+                                });
+                                event.stopPropagation();
+                            }}>
+                                <i className="fa-solid fa-download"></i>
+                            </button>
+                            <button className="icon-btn cancel" title="Delete plan" onClick={event => {
+                                syncer.postMessage({
+                                    type: "delete",
+                                    plan: index
+                                });
+                                main_ref.current.focus();
+                                event.stopPropagation();
+                            }} disabled={Object.keys(titles).length === 1}>
+                                <i className="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>;
+                })}
+                <button className="icon-btn add" onClick={() => syncer.postMessage({
+                    type: "add",
+                    content: default_plan
+                })}>
+                    <div className="main">
+                        <i className="fa-solid fa-circle-plus"></i>
                     </div>
-                </div>;
-            })}
-            <button className="icon-btn add" onClick={() => syncer.postMessage({
-                type: "add",
-                content: default_plan
-            })}>
-                <div className="main">
-                    <i className="fa-solid fa-circle-plus"></i>
-                </div>
-            </button>
+                </button>
+            </div>
         </div>
     </>;
 }

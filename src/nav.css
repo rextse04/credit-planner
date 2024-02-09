@@ -61,31 +61,64 @@
     color: var(--color);
 }
 
+@keyframes collapse {
+    0% {
+        height: var(--init-height);
+        overflow: hidden;
+    }
+    49.99% {
+        height: 0;
+        overflow: hidden;
+    }
+    50% {
+        height: auto;
+        visibility: hidden;
+    }
+    100% {
+        height: auto;
+        visibility: hidden;
+        position: fixed;
+    }
+}
+.collapsable {
+    --duration: 0.5s;
+    --collapse-height: 0px;
+    animation: collapse calc(var(--duration) * 2) ease-in-out forwards;
+}
+@keyframes expand {
+    0% {
+        height: 0;
+        overflow: hidden;
+    }
+    99.99% {
+        height: var(--init-height);
+        overflow: hidden;
+    }
+    100% {
+        height: auto;
+    }
+}
+.collapsable.active, .active > .collapsable {
+    animation: expand var(--duration) ease-in-out forwards;
+}
+
 .menu-group {
     position: relative;
 }
 .menu-group > .menu {
-    visibility: hidden;
     position: absolute;
     z-index: 100;
-    top: calc(100% + 10px - 5px);
+    top: calc(100% + 10px);
     width: 300px;
     max-height: 80dvh;
-    overflow: auto;
-    margin: 5px;
     background: var(--theme);
-    clip-path: margin-box inset(0 0 100% 0);
-    
-    transition-property: visibility, clip-path;
-    transition-duration: 0.2s;
-    transition-timing-function: ease-in-out;
+    transition-duration: 0.3s;
 }
-.left {left: -5px}
-.right {right: -5px}
 .menu-group.active > .menu {
-    visibility: visible;
-    clip-path: margin-box inset(0 0 0 0);
+    overflow: auto;
 }
+.left {left: 0px}
+.right {right: 0px}
 .menu-group > .menu > * {
     width: 100%;
 }
@@ -94,6 +127,9 @@
     padding: 5px 10px;
     gap: 5px;
     font-size: smaller;
+}
+.plans-menu > * {
+    width: 100%;
 }
 .plans-menu > .frame-btn {
     justify-content: space-between;
