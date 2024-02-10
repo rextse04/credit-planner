@@ -1,4 +1,4 @@
-import { Children, useContext, useMemo, useRef, useState } from "react";
+import { Children, useContext, useId, useMemo, useRef, useState } from "react";
 import { useDB, useSync, useSyncReducer } from "./hooks";
 import { condense, parseSeason, parseSem, to_int } from "./util";
 import { Courses, Notifs } from "./App";
@@ -50,15 +50,18 @@ function get_class(message) {
     if(message === undefined || message.length === 0) return "";
     else return "has-message";
 }
-export function CredRow({subCourse, setSubCourse, insertSubCourse, setCode = undefined, hasToggle = false}) {
+export function CredRow({block, i, subCourse, setSubCourse, insertSubCourse, swapSubCourses, setCode = undefined, hasToggle = false}) {
     const [,,,setWindow] = useContext(Notifs);
     const [course, setCourse] = useSyncReducer((state, action) => ({...state, ...action}), subCourse);
 
-    var status = "code ";
-    if(course.error === undefined) status += course.warn_code ? "warn " : "";
-    else status += course.error ? "error " : (course.warn_code ? "warn " : "success ");
+    const status = useMemo(() => {
+        var out = "code ";
+        if(course.error === undefined) out += course.warn_code ? "warn " : "";
+        else out += course.error ? "error " : (course.warn_code ? "warn " : "success ");
+        return out;
+    }, [course]);
 
-    return <tr {...util.useCRDnD(course, setSubCourse, insertSubCourse)}>
+    return <tr {...util.useCRDnD(block, i, course, setSubCourse, insertSubCourse, swapSubCourses)}>
         {hasToggle && <td className="toggle">
             <div className="input-wrapper">
                 <button title={course.disabled ? "Enable course" : "Disable course"}
@@ -207,12 +210,13 @@ function Setting({startSem, setStartSem, sems, setSems}) {
     </div>;
 }
 export function CredBlock({sem, start = false, settings = {}, subCourses, setSubCourses, subTotalCred}) {
+    const id = useId();
     const [,setCourses] = useContext(Courses);
     const [,,,setWindow] = useContext(Notifs);
     const sem_name = useMemo(() => parseSem(sem), [sem]);
     var rows = [];
     if(subCourses !== undefined) for(let i = 0; i < subCourses.length; ++i) {
-        rows.push(<CredRow key={i} subCourse={subCourses[i]}
+        rows.push(<CredRow key={i} block={id} i={i} subCourse={subCourses[i]}
             setSubCourse={course => {
                 if(course === null) {
                     const code = subCourses[i].code;
@@ -228,7 +232,8 @@ export function CredBlock({sem, start = false, settings = {}, subCourses, setSub
                 }
             }}
             setCode={util.setCode.bind(setCourses, sem, i)}
-            insertSubCourse={util.insertSubCourse.bind(setCourses, sem, i)}>
+            insertSubCourse={util.insertSubCourse.bind(setCourses, sem, i)}
+            swapSubCourses={util.swapSubCourses.bind(setSubCourses, subCourses)}>
         </CredRow>);
     }
     return <div className="block-wrapper">

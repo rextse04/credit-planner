@@ -5,6 +5,7 @@ import { useBC, useCollapsable, useDB, useSync } from "./hooks";
 import { to_int } from "./util";
 import { Courses, Notifs, syncer } from "./App";
 import * as logic from "./logic";
+import { swapSubCourses as gen_swapSubCourses } from "./planner_util";
 
 class req {
     cred = 0;
@@ -29,6 +30,7 @@ function RestraintField({value, setValue, caption, error}) {
 }
 
 function ReqGroup({group, setGroup, allowDel = false}) {
+    const id = useId();
     var rows = [];
     for(let i = 0; i < group.members.length; ++i) {
         const member = group.members[i];
@@ -45,9 +47,14 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             ...group,
             members: group.members.toSpliced(i+p, 0, logic.course.from_entry(member))
         });
+        const swapSubCourses = gen_swapSubCourses.bind(
+            members => setGroup({...group, members: members}),
+            group.members
+        );
         if(member.type === "course") {
-            rows.push(<CredRow key={i} hasToggle={true}
-                subCourse={member} setSubCourse={setSubCourse} insertSubCourse={insertSubCourse}>
+            rows.push(<CredRow key={i} block={id} i={i} hasToggle={true}
+                subCourse={member} setSubCourse={setSubCourse}
+                insertSubCourse={insertSubCourse} swapSubCourses={swapSubCourses}>
             </CredRow>);
         } else {
             rows.push(<tr key={i}>

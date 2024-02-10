@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as logic from "./logic";
 
 export const dnd_activate_time = 1000;
@@ -220,6 +220,13 @@ export function deleteCode(sem, i, code) {
         return new_courses;
     });
 }
+export function swapSubCourses(subCourses, i, j, p) {
+    if(i === j) return;
+    this(subCourses
+        .toSpliced(j+p, 0, subCourses[i])
+        .toSpliced(j+p < i ? i+1 : i, 1)
+    );
+}
 
 export function check_plan(courses) {
     const past = [];
@@ -253,7 +260,7 @@ export function check_plan(courses) {
 }
 
 /** Use Credit Row Drag and Drop */
-export function useCRDnD(course, setSubCourse, insertSubCourse, enableUpper = true) {
+export function useCRDnD(block, i, course, setSubCourse, insertSubCourse, swapSubCourses, enableUpper = true) {
     const [pressed, setPressed] = useState(false);
     const timeout_id = useRef();
     const [drag, setDrag] = useState(false);
@@ -271,18 +278,22 @@ export function useCRDnD(course, setSubCourse, insertSubCourse, enableUpper = tr
         setOffsetY(null);
     };
 
-    var className = "";
-    if(drag) className += "block ";
-    if(dragging) className += "drag ";
-    switch(overIndex) {
-        case 0: className += "drag-over before"; break;
-        case 1: className += "drag-over after";
-    }
+    const className = useMemo(() => {
+        var out = "";
+        if(drag) out += "block ";
+        if(dragging) out += "drag ";
+        switch(overIndex) {
+            case 0: out += "drag-over before"; break;
+            case 1: out += "drag-over after";
+        }
+        return out;
+    }, [drag, dragging, overIndex]);
 
     const out = {
         ref: main,
         className: className,
         draggable: drag,
+        tabIndex: 0,
         style: {left: offsetX, top: offsetY},
         onPointerDown: event => {
             setPressed(true);
@@ -294,15 +305,19 @@ export function useCRDnD(course, setSubCourse, insertSubCourse, enableUpper = tr
         },
         onDragStart: event => {
             event.dataTransfer.dropEffect = "move";
-            event.dataTransfer.setData(format, JSON.stringify(course));
+            event.dataTransfer.setData(format, JSON.stringify({
+                ...course,
+                block: block,
+                i: i
+            }));
             event.dataTransfer.setDragImage(event.target, window.outerWidth, window.outerHeight);
             window.drop_success_handler = () => setSubCourse(null);
+            setDragging(true);
         },
         onDrag: event => {
             // Add 10 pixels between the pointer and the element to allow drag and drop
             setOffsetX(event.clientX + 10);
             setOffsetY(event.clientY + 10);
-            setDragging(true);
         },
         onDragEnd: cancel,
         onDragOver: event => {
@@ -319,10 +334,16 @@ export function useCRDnD(course, setSubCourse, insertSubCourse, enableUpper = tr
         onDrop: event => {
             event.preventDefault();
             if(overIndex === null) return;
-            const data = event.dataTransfer.getData(format);
-            if(data) {
-                window.drop_success_handler();
-                insertSubCourse(overIndex, JSON.parse(data));
+            const raw = event.dataTransfer.getData(format);
+            if(raw) {
+                const data = JSON.parse(raw);
+                if(data.block === block) swapSubCourses(data.i, i, overIndex);
+                else {
+                    delete data.block;
+                    delete data.i;
+                    if(window.drop_success_handler) window.drop_success_handler();
+                    insertSubCourse(overIndex, data);
+                }
             }
             setOverIndex(null);
         }
