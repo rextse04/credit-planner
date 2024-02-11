@@ -100,14 +100,14 @@ export function useForceUpdate() {
 
 export function useCollapsable(defaultActive = true) {
     const main_ref = useRef();
-    const [height, updateHeight] = useReducer(() => main_ref.current.offsetHeight + "px", "auto");
+    const [height, updateHeight] = useReducer(() => getComputedStyle(main_ref.current).height, "auto");
     const [loaded, setLoaded] = useState(false);
     const [prepare, setPrepare] = useState(false);
     const [active, setActive] = useState(defaultActive);
     useEffect(() => {
         if(prepare) {
             updateHeight();
-            setActive(collapsed => !collapsed);
+            setActive(active => !active);
             setPrepare(false);
         }
     }, [prepare]);
@@ -121,7 +121,7 @@ export function useCollapsable(defaultActive = true) {
         ref: main_ref,
         style: {
             "--init-height": height,
-            animationDuration: loaded ? undefined : "0s"
+            animationDuration: loaded && (!prepare || active) ? undefined : "0s"
         }
     }];
 }
