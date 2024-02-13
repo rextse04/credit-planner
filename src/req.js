@@ -1,4 +1,4 @@
-import { useContext, useEffect, useId, useReducer, useRef, useState } from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import { TitleInput } from "./nav";
 import { CredRow, PlaceholderCredRow } from "./planner";
 import { useBC, useCollapsable, useDB, useSync } from "./hooks";
@@ -32,7 +32,7 @@ function RestraintField({value, setValue, caption, error}) {
 function ReqGroup({group, setGroup, allowDel = false}) {
     const id = useId();
     var rows = [];
-    const setSubCourse = new_member => {
+    const setSubCourse = function(new_member) {
         const new_members = [...group.members];
         if(new_member === null) new_members.splice(this, 1);
         else new_members[this] = new_member;
@@ -41,10 +41,12 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             members: new_members
         });
     };
-    const insertSubCourse = (p, member) => setGroup({
-        ...group,
-        members: group.members.toSpliced(this+p, 0, logic.course.from_entry(member))
-    });
+    const insertSubCourse = function(p, member) {
+        setGroup({
+            ...group,
+            members: group.members.toSpliced(this+p, 0, logic.course.from_entry(member))
+        })
+    };
     const pushMember = insertSubCourse.bind(group.members.length, 0);
     const swapSubCourses = gen_swapSubCourses.bind(
         members => setGroup({...group, members: members}),
