@@ -45,7 +45,7 @@ function ReqGroup({group, setGroup, allowDel = false}) {
         setGroup({
             ...group,
             members: group.members.toSpliced(this+p, 0, logic.course.from_entry(course))
-        })
+        });
     };
     const swapSubCourses = gen_swapSubCourses.bind(
         members => setGroup({...group, members: members}),

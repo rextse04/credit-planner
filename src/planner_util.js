@@ -63,7 +63,7 @@ export function gen_check_course(ref, sem) {
     }
     return update;
 }
-export function gen_update_course(code, ref, sem) {
+export function gen_update_course(code, ref, sem, auto = true) {
     const empty = code === "";
     var new_course = {
         code: code,
@@ -80,12 +80,13 @@ export function gen_update_course(code, ref, sem) {
         new_course.message = "";
         new_course.warn_code = !empty;
         new_course.message_code = empty ? "" : msgs.unknown_code;
-    } else new_course = {
-        ...new_course,
-        ...this(ref, sem),
-        name: ref.name,
-        cred: ref.cred
-    };
+    } else {
+        new_course = {...new_course, ...this(ref, sem)};
+        if(auto) {
+            new_course.name = ref.name;
+            new_course.cred = ref.cred;
+        }
+    }
     return new_course;
 }
 export function setCode(sem, i, code, ref, prev_code = undefined) {
@@ -104,8 +105,7 @@ export function setCode(sem, i, code, ref, prev_code = undefined) {
         for(let sem_name in courses) {
             past.push(courses[sem_name]);
             if(sem_name === sem) {
-                if(auto) past.at(-1)[i] = new_courses[sem][i] = update_course(code, ref, sem);
-                else set_course(sem, i, check_course(ref, sem));
+                past.at(-1)[i] = new_courses[sem][i] = update_course(code, ref, sem, auto);
             }
             if(sem_name >= sem) {
                 const subcourses = courses[sem_name];
@@ -191,13 +191,12 @@ export function deleteCode(sem, i, code) {
                     const course = sub_courses[j];
                     const course_code = course.code;
                     if(sem_name === sem && course_code === code) {
-                        if(duplicate) {
-                            set_course(sem, j, {
+                        if(duplicate) set_course(sem, j, {
                                 error: true,
                                 duplicate: true,
                                 message: msgs.duplicate
-                            });
-                        } else {
+                        });
+                        else {
                             const ref = window.courses[code];
                             let update = {
                                 error: ref === undefined ? undefined : false,
