@@ -31,7 +31,7 @@ function RestraintField({value, setValue, caption, error}) {
 
 function ReqGroup({group, setGroup, allowDel = false}) {
     const id = useId();
-    var rows = [];
+    const rows = [];
     const setSubCourse = function(new_member) {
         const new_members = [...group.members];
         if(new_member === null) new_members.splice(this, 1);
@@ -41,17 +41,21 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             members: new_members
         });
     };
-    const insertSubCourse = function(p, member) {
+    const insertSubCourse = function(p, course) {
         setGroup({
             ...group,
-            members: group.members.toSpliced(this+p, 0, logic.course.from_entry(member))
+            members: group.members.toSpliced(this+p, 0, logic.course.from_entry(course))
         })
     };
-    const pushMember = insertSubCourse.bind(group.members.length, 0);
     const swapSubCourses = gen_swapSubCourses.bind(
         members => setGroup({...group, members: members}),
         group.members
     );
+    const pushMember = member => {
+        const new_members = [...group.members];
+        new_members.push(member);
+        setGroup({...group, members: new_members});
+    };
     for(let i = 0; i < group.members.length; ++i) {
         const member = group.members[i];
         if(member.type === "course") {
