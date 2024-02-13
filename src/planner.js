@@ -1,4 +1,4 @@
-import { Children, useContext, useId, useMemo, useRef, useState } from "react";
+import { Children, useContext, useId, useMemo } from "react";
 import { useDB, useSync, useSyncReducer } from "./hooks";
 import { condense, parseSeason, parseSem, to_int } from "./util";
 import { Courses, Notifs } from "./App";
@@ -209,6 +209,12 @@ function Setting({startSem, setStartSem, sems, setSems}) {
         </div>
     </div>;
 }
+
+export function PlaceholderCredRow({block, insertSubCourse, swapSubCourses, enableUpper = false}) {
+    const pkg = util.useCRD(block, -1, insertSubCourse, swapSubCourses, enableUpper);
+    pkg.className += " placeholder";
+    return <tr {...pkg}></tr>;
+}
 export function CredBlock({sem, start = false, settings = {}, subCourses, setSubCourses, subTotalCred}) {
     const id = useId();
     const [,setCourses] = useContext(Courses);
@@ -256,6 +262,10 @@ export function CredBlock({sem, start = false, settings = {}, subCourses, setSub
                             <th className="cred">Credit</th>
                             <th className="del"></th>
                         </tr>
+                        <PlaceholderCredRow block={id} enableUpper={false}
+                            insertSubCourse={util.insertSubCourse.bind(setCourses, sem, -1)}
+                            swapSubCourses={util.swapSubCourses.bind(setSubCourses, subCourses)}>
+                        </PlaceholderCredRow>
                     </thead>
                     <tbody>{rows}</tbody>
                 </table>

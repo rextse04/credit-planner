@@ -1,6 +1,6 @@
 import { useContext, useEffect, useId, useReducer, useRef, useState } from "react";
 import { TitleInput } from "./nav";
-import { CredRow } from "./planner";
+import { CredRow, PlaceholderCredRow } from "./planner";
 import { useBC, useCollapsable, useDB, useSync } from "./hooks";
 import { to_int } from "./util";
 import { Courses, Notifs, syncer } from "./App";
@@ -32,29 +32,30 @@ function RestraintField({value, setValue, caption, error}) {
 function ReqGroup({group, setGroup, allowDel = false}) {
     const id = useId();
     var rows = [];
+    const setSubCourse = new_member => {
+        const new_members = [...group.members];
+        if(new_member === null) new_members.splice(this, 1);
+        else new_members[this] = new_member;
+        setGroup({
+            ...group,
+            members: new_members
+        });
+    };
+    const insertSubCourse = (p, member) => setGroup({
+        ...group,
+        members: group.members.toSpliced(this+p, 0, logic.course.from_entry(member))
+    });
+    const pushMember = insertSubCourse.bind(group.members.length, 0);
+    const swapSubCourses = gen_swapSubCourses.bind(
+        members => setGroup({...group, members: members}),
+        group.members
+    );
     for(let i = 0; i < group.members.length; ++i) {
         const member = group.members[i];
-        const setSubCourse = new_member => {
-            const new_members = [...group.members];
-            if(new_member === null) new_members.splice(i, 1);
-            else new_members[i] = new_member;
-            setGroup({
-                ...group,
-                members: new_members
-            });
-        }
-        const insertSubCourse = (p, member) => setGroup({
-            ...group,
-            members: group.members.toSpliced(i+p, 0, logic.course.from_entry(member))
-        });
-        const swapSubCourses = gen_swapSubCourses.bind(
-            members => setGroup({...group, members: members}),
-            group.members
-        );
         if(member.type === "course") {
             rows.push(<CredRow key={i} block={id} i={i} hasToggle={true}
-                subCourse={member} setSubCourse={setSubCourse}
-                insertSubCourse={insertSubCourse} swapSubCourses={swapSubCourses}>
+                subCourse={member} setSubCourse={setSubCourse.bind(i)}
+                insertSubCourse={insertSubCourse.bind(i)} swapSubCourses={swapSubCourses}>
             </CredRow>);
         } else {
             rows.push(<tr key={i}>
@@ -62,14 +63,6 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             </tr>);
         }
     }
-    const pushMember = member => {
-        const new_members = [...group.members];
-        new_members.push(member);
-        setGroup({
-            ...group,
-            members: new_members
-        });
-    };
     return <div className={"vertical sec container " + logic.get_class(group.error)} data-type={group.type}>
         <div className="btn-group">
             <button className="block text-btn" title="Add course"
@@ -102,6 +95,9 @@ function ReqGroup({group, setGroup, allowDel = false}) {
                     <th className="cred">Credit</th>
                     <th className="del"></th>
                 </tr>
+                <PlaceholderCredRow block={id} enableUpper={false}
+                    insertSubCourse={insertSubCourse.bind(-1)}
+                    swapSubCourses={swapSubCourses}></PlaceholderCredRow>
             </thead>
             <tbody>{rows}</tbody>
         </table>

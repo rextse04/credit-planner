@@ -52,17 +52,48 @@
 .cred-tb .del {
     width: 18px;
 }
-.cred-tb > thead > tr::after {
-    content: "";
-    display: table-cell;
-    width: 0;
-}
 .cred-tb td > input:not([type=checkbox]) {
     width: 100%;
     text-overflow: ellipsis;
 }
 .cred-tb td:last-child {
     text-align: center;
+}
+
+.cred-tb > thead {
+    position: relative;
+}
+.cred-tb > thead > tr:first-child:after {
+    content: "";
+    display: table-cell;
+    width: 0;
+}
+.cred-tb > thead > tr.placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.cred-tb > tbody tr.drag {
+    position: fixed;
+}
+.cred-tb tr.drag-over {
+    position: relative;
+}
+.cred-tb tr.drag-over::after {
+    content: ">";
+    position: absolute;
+    right: calc(100% + 3px);
+    color: var(--add-color);
+}
+.cred-tb tr.drag-over.before::after {
+    top: 0;
+    transform: translateY(-50%);
+}
+.cred-tb tr.drag-over.after::after {
+    bottom: 0;
+    transform: translateY(50%);
 }
 
 .planner > .aux {
@@ -89,25 +120,4 @@
 }
 .sem-setting > .form .sems {
     width: 4ch;
-}
-
-.cred-tb > tbody tr.drag {
-    position: fixed;
-}
-.cred-tb tr.drag-over {
-    position: relative;
-}
-.cred-tb tr.drag-over::after {
-    content: ">";
-    position: absolute;
-    right: calc(100% + 3px);
-    color: var(--add-color);
-}
-.cred-tb tr.drag-over.before::after {
-    top: 0;
-    transform: translateY(-50%);
-}
-.cred-tb tr.drag-over.after::after {
-    bottom: 0;
-    transform: translateY(50%);
 }
