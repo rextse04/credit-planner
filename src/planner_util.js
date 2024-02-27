@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import * as logic from "./logic";
 
 export const dnd_activate_time = 1000;
@@ -74,8 +74,10 @@ export function gen_update_course(code, ref, sem, auto = true) {
         message_cred: ""
     };
     if(ref === undefined) {
-        new_course.name = "";
-        new_course.cred = 0;
+        if(auto) {
+            new_course.name = "";
+            new_course.cred = 0;
+        }
         new_course.error = undefined;
         new_course.message = "";
         new_course.warn_code = !empty;
@@ -104,9 +106,9 @@ export function setCode(sem, i, code, ref, prev_code = undefined) {
         var prev_duplicate = false;
         for(let sem_name in courses) {
             past.push(courses[sem_name]);
-            if(sem_name === sem) {
-                past.at(-1)[i] = new_courses[sem][i] = update_course(code, ref, sem, auto);
-            }
+            if(sem_name === sem) past.at(-1)[i] = auto ?
+                (new_courses[sem][i] = update_course(code, ref, sem, true)) :
+                (set_course(sem, i, update_course(code, ref, sem, false)));
             if(sem_name >= sem) {
                 const subcourses = courses[sem_name];
                 for(let j = 0; j < subcourses.length; ++j) {
@@ -314,14 +316,14 @@ export function useCRDnD(block, i, course, setSubCourse, insertSubCourse, swapSu
     const [dragging, setDragging] = useState(false);
     const [offsetX, setOffsetX] = useState(null);
     const [offsetY, setOffsetY] = useState(null);
-    const cancel = () => {
+    const cancel = useCallback(() => {
         clearTimeout(timeout_id.current);
         setPressed(false);
         setDrag(false);
         setDragging(false);
         setOffsetX(null);
         setOffsetY(null);
-    };
+    }, []);
 
     const className = useMemo(() => {
         var out = " ";
