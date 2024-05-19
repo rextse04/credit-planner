@@ -65,7 +65,7 @@ function ReqGroup({group, setGroup, allowDel = false}) {
             </CredRow>);
         } else {
             rows.push(<tr key={i}>
-                <td colSpan="5"><ReqGroup group={member} setGroup={setSubCourse}></ReqGroup></td>
+                <td colSpan="5"><ReqGroup group={member} setGroup={setSubCourse.bind(i)}></ReqGroup></td>
             </tr>);
         }
     }
