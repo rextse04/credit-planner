@@ -41,7 +41,12 @@ export function length(group) {
 }
 export function n(group) {
     var count = 0;
-    for(let member of group.members) if(member.error === false) ++count;
+    for(let member of group.members) {
+        if(Array.isArray(member.members))
+            count += n(member);
+        else
+            if(member.error === false) ++count;
+    }
     return count;
 }
 export function cred(req, counter = {}) {
@@ -57,7 +62,7 @@ export function cred(req, counter = {}) {
             for(let member of req.members) if(member.error === false) return cred(member, counter);
     }
 }
-export function test(req, courses, past = new Set()) {
+export function test(req, courses) {
     if(req.type === "empty") return {...req, error: false};
     else if(req.type === "course") {
         if(req.disabled) return {...req, error: undefined};
@@ -74,9 +79,8 @@ export function test(req, courses, past = new Set()) {
         }
         for(let course of courses) {
             let code = course.code;
-            if(!past.has(code) && regex.test(code)) {
+            if(regex.test(code)) {
                 pass = true;
-                past.add(code);
                 break;
             }
         }
@@ -91,7 +95,7 @@ export function test(req, courses, past = new Set()) {
         let process = (default_error, subprocess) => {
             new_req.error = default_error && len !== 0;
             for(let member of req.members) {
-                let i = members.push(test(member, courses, past));
+                let i = members.push(test(member, courses));
                 let error = members[i-1].error;
                 if(error !== undefined) new_req.error = subprocess(error);
             }
