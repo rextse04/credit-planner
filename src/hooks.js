@@ -47,13 +47,19 @@ export function useBC(
 // Note: The hooks below gives the caller the ownership of the localStorage prop.
 // Calling them more than once for the same prop in different components can lead to bugs.
 export function usePlan(key) { //self-bind LS
-    const [plan, setPlan] = useState(() => getStorage(key));
+    const [plan, setPlanState] = useState(() => getStorage(key));
+    const setPlan = updater => setPlanState(prev_value => {
+        const new_value = typeof updater === "function" ? updater(prev_value) : updater;
+        setStorage(key, new_value);
+        return new_value;
+    });
     const plan_ref = useRef();
     plan_ref.current = plan;
     useEffect(() => {
         const onMessage = event => {
             const message = event.data;
-            if(message.plan === plan_ref.current && "plan" in message.content) setPlan(message.content.plan);
+            if(message.plan === plan_ref.current && "plan" in message.content)
+                setPlan(message.content.plan);
         };
         update_bc.addEventListener("message", onMessage);
         return () => update_bc.removeEventListener("message", onMessage);
