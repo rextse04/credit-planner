@@ -9,7 +9,7 @@ A [simple static web app](https://rextse04.github.io/credit-planner/) to help HK
 1. A major requirements checker.
 1. Ability to save multiple plans locally.
 1. Data stays in your browser only, not shared with anyone.
-1. Export the plan as an Excel file (coming soon).
+1. Export the plan as an Excel file.
 
 ## FAQs
 
