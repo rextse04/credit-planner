@@ -166,19 +166,30 @@ export function count(req, counter) {
     }
 }
 export function stringify(req) {
-    if(req.type === "empty") return "";
-    else if(req.type === "course") return req.code;
-    else {
-        var out = "";
-        for(let i = req.members.length - 1; i >= 0; --i) {
-            let member = req.members[i];
-            let subname = stringify(member);
-            if(member.type !== "course") subname = `(${subname})`;
-            if(i === 0) out = subname + out;
-            else out = ` ${req.type} ${subname}${out}`;
-        }
-        return out;
+    switch(req.type) {
+        case "empty": return "";
+        case "course": return req.code;
+        default:
+            var out = "";
+            for(let i = req.members.length - 1; i >= 0; --i) {
+                let member = req.members[i];
+                let subname = stringify(member);
+                if(member.type !== "course") subname = `(${subname})`;
+                if(i === 0) out = subname + out;
+                else out = ` ${req.type} ${subname}${out}`;
+            }
+            return out;
     }
+}
+export function flatten(req, set = new Set) {
+    switch(req.type) {
+        case "empty": return set;
+        case "course": return set.add(req);
+        default:
+            for(let member of req.members)
+                flatten(member, set);
+    }
+    return set;
 }
 export function get_class(error) {
     switch(error) {

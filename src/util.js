@@ -30,11 +30,31 @@ export function parseSeason(season) {
         case 20: return "Winter";
         case 30: return "Spring";
         case 40: return "Summer";
+        default: return "";
     }
 }
-export function parseSem(sem) {
-    var year = +sem.slice(0, 2);
-    return `20${year}-${year - (-1)} ${parseSeason(+sem.slice(2, 4))}`;
+export class semester {
+    constructor(str) {
+        this.year = parseInt(str.slice(0, 2));
+        this.season = parseInt(str.slice(2, 4));
+    }
+    name() {
+        return `${this.year}${this.season}`;
+    }
+    to_str() {
+        return `20${this.year}-${this.year - (-1)} ${parseSeason(this.season)}`;
+    }
+    is_last() {
+        return this.season === 40;
+    }
+    next() {
+        if(this.is_last()) {
+            ++this.year;
+            this.season = 10;
+        } else {
+            this.season += 10;
+        }
+    }
 }
 export function condense(str) {
     return str.replace(/\s/g, "");

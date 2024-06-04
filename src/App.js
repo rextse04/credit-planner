@@ -111,6 +111,7 @@ export default function App() {
                 break;
             case "export":
             case "req_export":
+            case "excel":
                 const file = new File([message.content], message.filename);
                 const link = URL.createObjectURL(file);
                 const a = document.createElement("a");

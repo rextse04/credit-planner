@@ -20,6 +20,7 @@ export function MenuButton({children}) {
 function Menus({active, setActive, pkg}) {
     const [,setCourses] = useContext(Courses);
     const [,,,setWindow] = useContext(Notifs);
+    const [plan,, titles] = useContext(Plan);
     return <>
         <button title="Menu" className={"icon-btn " + (active ? "active" : "")}
             onClick={() => setActive(active => !active)}>
@@ -45,7 +46,14 @@ function Menus({active, setActive, pkg}) {
                 <i className="icon fa-solid fa-file-import"></i>
                 <span className="text">Import template</span>
             </button>
-            <button className="text-btn text-icon container">
+            <button className="text-btn text-icon container" onClick={() => {
+                syncer.postMessage({
+                    type: "excel",
+                    plan: plan,
+                    filename: titles[plan] + ".xlsx"
+                });
+                setActive(false);
+            }}>
                 <i className="icon fa-solid fa-file-excel"></i>
                 <span className="text">Export as Excel file</span>
             </button>

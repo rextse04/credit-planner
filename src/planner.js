@@ -1,6 +1,6 @@
 import { Children, useContext, useId, useMemo } from "react";
 import { useDB, useSync, useSyncReducer } from "./hooks";
-import { condense, parseSeason, parseSem, to_int } from "./util";
+import { condense, parseSeason, semester, to_int } from "./util";
 import { Courses, Notifs } from "./App";
 import * as util from "./planner_util";
 
@@ -215,11 +215,10 @@ export function PlaceholderCredRow({block, insertSubCourse, swapSubCourses, enab
     pkg.className += " placeholder";
     return <tr {...pkg}></tr>;
 }
-export function CredBlock({sem, start = false, settings = {}, subCourses, setSubCourses, subTotalCred}) {
+export function CredBlock({sem, sem_str, start = false, settings = {}, subCourses, setSubCourses, subTotalCred}) {
     const id = useId();
     const [,setCourses] = useContext(Courses);
     const [,,,setWindow] = useContext(Notifs);
-    const sem_name = useMemo(() => parseSem(sem), [sem]);
     var rows = [];
     if(subCourses !== undefined) for(let i = 0; i < subCourses.length; ++i) {
         rows.push(<CredRow key={i} block={id} i={i} subCourse={subCourses[i]}
@@ -245,7 +244,7 @@ export function CredBlock({sem, start = false, settings = {}, subCourses, setSub
     return <div className="block-wrapper">
         <div className="block">
             <div className="container nav">
-                <span>{sem_name}</span>
+                <span>{sem_str}</span>
                 {start && <button className="icon-btn" onClick={() => setWindow({
                     title: "Plan Settings",
                     content: <Setting {...settings}></Setting>
@@ -291,12 +290,11 @@ export default function Planner({setReqToggle}) {
     const [startSem, setStartSem] = useDB("startSem");
     const [sems, setSems] = useDB("sems");
     const [courses, setCourses] = useContext(Courses);
-    var year = startSem.slice(0, 2);
-    var sem = parseInt(startSem.slice(2, 4));
+    const sem = new semester(startSem);
     var blocks = [];
     var total_cred = 0;
     for(let i = 0; i < sems; ++i) {
-        let sem_name = `${year}${sem}`;
+        let sem_name = sem.name();
         let sem_courses = courses[sem_name];
         let subtotal_cred = 0;
         let extra_props = i === 0 ? {
@@ -311,20 +309,14 @@ export default function Planner({setReqToggle}) {
         if(sem_courses !== undefined) for(let course of sem_courses) {
             subtotal_cred += course.cred;
         }
-        blocks.push(<CredBlock key={sem_name} sem={sem_name} {...extra_props}
+        blocks.push(<CredBlock key={sem_name} sem={sem_name} sem_str={sem.to_str()} {...extra_props}
             subCourses={courses[sem_name]} setSubCourses={sub_courses => {
                 var new_courses = {...courses};
                 new_courses[sem_name] = sub_courses;
                 setCourses(new_courses);
             }} subTotalCred={subtotal_cred}></CredBlock>);
         total_cred += subtotal_cred;
-        // Next sem
-        if(sem === 40) {
-            ++year;
-            sem = 10;
-        } else {
-            sem += 10;
-        }
+        sem.next();
     }
     return <div className="planner">
         <div className="main">{blocks}</div>

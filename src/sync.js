@@ -1,5 +1,6 @@
 import { Dexie } from "dexie";
 import { read_import } from "./util";
+import { to_workbook } from "./excel";
 import * as logic from './logic';
 
 const db = new Dexie("main");
@@ -48,10 +49,19 @@ self.onmessage = async event => {
                 });
                 break;
             case "export":
+            {
                 const raw = await db.plans.get(message.plan);
                 delete raw.index;
                 response.content = JSON.stringify(raw);
                 break;
+            }
+            case "excel":
+            {
+                const raw = await db.plans.get(message.plan);
+                const wb = to_workbook(raw);
+                response.content = await wb.xlsx.writeBuffer();
+                break;
+            }
             case "add":
                 response.plan = await db.plans.add(message.content);
                 break;
